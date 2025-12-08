@@ -24,6 +24,8 @@ SECRET_KEY = 'django-insecure-t6l*-(@i&a9c-7@sp_4j*(e%^+6757&w&_z7wcx6x97re&()$x
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+# Set to Enable when using Docker, yeahhh.... My Styleee
+DOCKER_MODE = False
 
 ALLOWED_HOSTS = []
 
@@ -75,17 +77,31 @@ WSGI_APPLICATION = 'philhealth_eKonsulta.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'eKonsulta_db',
-        'USER': 'postgres',
-        'PASSWORD': 'password1',
-        'HOST': 'localhost',
-        'PORT': '5432',
+# Database Selector shit... uhhh
+if DOCKER_MODE:
+    print("Using Docker PostgreSQL Database")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'eKonsulta_db',
+            'USER': 'postgres',
+            'PASSWORD': 'password1',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
     }
-}
-
+else:
+    print("Using Local PostgreSQL Database")
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'postgres',
+            'USER': 'postgres',
+            'PASSWORD': 'postgres',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
