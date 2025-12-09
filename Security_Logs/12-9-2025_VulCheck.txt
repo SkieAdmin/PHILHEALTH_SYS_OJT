@@ -1,0 +1,400 @@
+================================================================================
+          PHILHEALTH eKONSULTA - SECURITY VULNERABILITY ASSESSMENT
+================================================================================
+Date: December 9, 2025
+Project: philhealth_eKonsulta (Django 6.0)
+Assessment Type: Static Code Analysis (Updated)
+================================================================================
+
+                              EXECUTIVE SUMMARY
+--------------------------------------------------------------------------------
+This assessment identified 14 security vulnerabilities across the application.
+Several are CRITICAL and require immediate attention before production deployment.
+
+Risk Distribution:
+  - CRITICAL: 4
+  - HIGH: 5
+  - MEDIUM: 3
+  - LOW: 2
+
+================================================================================
+                           CRITICAL VULNERABILITIES
+================================================================================
+
+[C-01] HARDCODED SECRET_KEY
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py:23
+Severity: CRITICAL
+
+Finding:
+  SECRET_KEY = 'django-insecure-t6l*-(@i&a9c-7@sp_4j*(e%^+6757&w&_z7wcx6x97re&()$x'
+
+Impact:
+  - Session hijacking
+  - CSRF token forgery
+  - Cryptographic signature bypass
+
+Recommendation:
+  - Use environment variables:
+    import os
+    SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+--------------------------------------------------------------------------------
+
+[C-02] HARDCODED DATABASE CREDENTIALS
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py:85-86, 97-98
+Severity: CRITICAL
+
+Finding:
+  Docker Mode:  USER: 'admin', PASSWORD: 'admin123'
+  Local Mode:   USER: 'postgres', PASSWORD: 'password1'
+
+Impact:
+  - Direct database access if source code is exposed
+  - Credential exposure in version control
+
+Recommendation:
+  - Use environment variables for all database credentials
+  - Use .env file with python-dotenv
+
+--------------------------------------------------------------------------------
+
+[C-03] ALL PASSWORD VALIDATORS DISABLED
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py:107-111
+Severity: CRITICAL
+
+Finding:
+  AUTH_PASSWORD_VALIDATORS = []  # All validators commented out
+
+Impact:
+  - Users can set extremely weak passwords (e.g., "1", "a")
+  - Susceptible to brute force attacks
+  - Healthcare data at risk
+
+Recommendation:
+  - Uncomment and enable all default validators
+  - Add minimum 12 character requirement for healthcare compliance
+
+--------------------------------------------------------------------------------
+
+[C-04] DEBUG MODE ENABLED
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py:26
+Severity: CRITICAL (if deployed to production)
+
+Finding:
+  DEBUG = True
+
+Impact:
+  - Full stack traces exposed to attackers
+  - Database queries visible in errors
+  - Internal paths exposed
+
+Recommendation:
+  - Set DEBUG = False for production
+  - Use environment variable: DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+
+================================================================================
+                            HIGH VULNERABILITIES
+================================================================================
+
+[H-01] LOGOUT URL CONFIGURATION ERROR
+--------------------------------------------------------------------------------
+Location: login/urls.py:6
+Severity: HIGH
+
+Finding:
+  path(' ', views.user_logout, name="logout")
+       ^^^
+  URL path contains a space character instead of 'logout/'
+
+Impact:
+  - Logout functionality is broken/inaccessible
+  - Users cannot properly end sessions
+  - Session fixation risk
+
+Recommendation:
+  - Change to: path('logout/', views.user_logout, name="logout")
+
+--------------------------------------------------------------------------------
+
+[H-02] MISSING ROLE-BASED ACCESS CONTROL ON DASHBOARDS
+--------------------------------------------------------------------------------
+Location: login/views.py:80-91
+Severity: HIGH
+
+Finding:
+  @login_required
+  def doctor_dashboard(request):
+      return render(request, "login/doctor.html")  # No role verification!
+
+  Same issue for: superadmin_dashboard, secretary_dashboard, finance_dashboard
+
+Impact:
+  - Any authenticated user can access ANY dashboard by URL
+  - Doctor can access /finance-dashboard/
+  - Secretary can access /superadmin-dashboard/
+  - Horizontal privilege escalation
+
+Recommendation:
+  Add role check to each dashboard:
+
+  @login_required
+  def doctor_dashboard(request):
+      if request.user.role != "DOCTOR":
+          return redirect("login")  # or return 403
+      return render(request, "login/doctor.html")
+
+--------------------------------------------------------------------------------
+
+[H-03] LOGOUT NOT CSRF PROTECTED
+--------------------------------------------------------------------------------
+Location: login/views.py:94-96
+Severity: HIGH
+
+Finding:
+  def user_logout(request):
+      logout(request)
+      return redirect("login")
+
+Impact:
+  - CSRF logout attacks possible
+  - Malicious site can log users out via GET request
+
+Recommendation:
+  - Require POST method for logout
+  - Add @require_POST decorator or check request.method
+
+--------------------------------------------------------------------------------
+
+[H-04] MISSING LOGIN_URL SETTING
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py
+Severity: HIGH
+
+Finding:
+  LOGIN_URL setting is not configured
+
+Impact:
+  - @login_required redirects to /accounts/login/ (doesn't exist)
+  - Users see 404 error instead of login page
+  - Broken authentication flow
+
+Recommendation:
+  Add to settings.py:
+    LOGIN_URL = 'login'
+    LOGIN_REDIRECT_URL = 'login'
+
+--------------------------------------------------------------------------------
+
+[H-05] ALLOWED_HOSTS EMPTY
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py:30
+Severity: HIGH
+
+Finding:
+  ALLOWED_HOSTS = []
+
+Impact:
+  - HTTP Host header attacks
+  - Cache poisoning
+  - Password reset poisoning
+
+Recommendation:
+  - Define explicit allowed hosts:
+    ALLOWED_HOSTS = ['yourdomain.com', 'localhost', '127.0.0.1']
+
+================================================================================
+                           MEDIUM VULNERABILITIES
+================================================================================
+
+[M-01] NO SESSION SECURITY CONFIGURATION
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py
+Severity: MEDIUM
+
+Finding:
+  Missing session security settings.
+
+Recommendation:
+  Add to settings.py:
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SECURE = True  # For HTTPS
+    SESSION_COOKIE_AGE = 3600     # 1 hour timeout
+    SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+    SESSION_COOKIE_SAMESITE = 'Strict'
+
+--------------------------------------------------------------------------------
+
+[M-02] RAW POST DATA ACCESS WITHOUT VALIDATION
+--------------------------------------------------------------------------------
+Location: login/views.py:10-11, 27-28, 43-45, 63-64
+Severity: MEDIUM
+
+Finding:
+  username = request.POST["username"]  # Raises KeyError if missing
+
+Impact:
+  - Application crashes on malformed requests (500 error)
+  - Potential denial of service
+
+Recommendation:
+  - Use request.POST.get("username", "") with validation
+  - Or use Django Forms for proper input handling
+
+--------------------------------------------------------------------------------
+
+[M-03] DELETE OPERATION VIA GET REQUEST
+--------------------------------------------------------------------------------
+Location: login/views.py:69-75, login/urls.py:17
+Severity: MEDIUM
+
+Finding:
+  def delete_user_view(request, user_id):
+      # Deletes user on ANY request method (GET included)
+      user.delete()
+
+Impact:
+  - CSRF attacks can delete users
+  - Accidental deletion via browser prefetch
+
+Recommendation:
+  - Require POST/DELETE method
+  - Add confirmation step
+
+================================================================================
+                            LOW VULNERABILITIES
+================================================================================
+
+[L-01] NO LOGGING CONFIGURATION
+--------------------------------------------------------------------------------
+Location: philhealth_eKonsulta/settings.py
+Severity: LOW
+
+Finding:
+  No LOGGING configuration for security events.
+
+Impact:
+  - No audit trail for compliance
+  - Cannot detect or investigate breaches
+
+Recommendation:
+  - Configure Django logging for authentication events
+  - Log failed login attempts
+
+--------------------------------------------------------------------------------
+
+[L-02] INCONSISTENT ROLE DEFAULT VALUE
+--------------------------------------------------------------------------------
+Location: login/models.py:11
+Severity: LOW
+
+Finding:
+  role = models.CharField(..., default='PATIENT')
+  # 'PATIENT' is not in ROLE_CHOICES list
+
+Impact:
+  - Data integrity issues
+  - Undefined behavior for new users
+
+Recommendation:
+  - Add 'PATIENT' to ROLE_CHOICES or use valid default
+
+================================================================================
+                       ACCESS CONTROL VULNERABILITY MAP
+================================================================================
+
+Current State - Who Can Access What:
+
+  URL                        | Required Role | Actual Access
+  ---------------------------|---------------|------------------
+  /superadmin-dashboard/     | SUPERADMIN    | ANY LOGGED IN USER
+  /doctor-dashboard/         | DOCTOR        | ANY LOGGED IN USER
+  /secretary-dashboard/      | SECRETARY     | ANY LOGGED IN USER
+  /finance-dashboard/        | FINANCE       | ANY LOGGED IN USER
+  /create-user/              | SUPERADMIN    | SUPERADMIN (OK)
+  /list-users/               | SUPERADMIN    | SUPERADMIN (OK)
+  /update-user/<id>/         | SUPERADMIN    | SUPERADMIN (OK)
+  /delete-user/<id>/         | SUPERADMIN    | SUPERADMIN (OK)
+
+CRUD operations have proper role checks. Dashboard views do NOT.
+
+================================================================================
+                         IMMEDIATE ACTION ITEMS
+================================================================================
+
+Priority 1 - Fix Before Any Testing:
+------------------------------------
+[ ] Fix logout URL path (remove space, use 'logout/')
+[ ] Add LOGIN_URL = 'login' to settings.py
+[ ] Add role checks to all dashboard views
+
+Priority 2 - Fix Before Deployment:
+-----------------------------------
+[ ] Move SECRET_KEY to environment variable
+[ ] Move database credentials to environment variables
+[ ] Enable password validators
+[ ] Set DEBUG = False
+[ ] Configure ALLOWED_HOSTS
+[ ] Add session security settings
+
+Priority 3 - Security Hardening:
+--------------------------------
+[ ] Add CSRF protection to logout (POST only)
+[ ] Add rate limiting to login views
+[ ] Require POST for delete operations
+[ ] Configure security logging
+[ ] Add HTTPS enforcement settings
+
+================================================================================
+                         RECOMMENDED SETTINGS.PY ADDITIONS
+================================================================================
+
+# Add these to settings.py for production:
+
+import os
+
+# Security
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback-dev-key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['your-domain.com', 'localhost']
+
+# Authentication
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'login'
+
+# Session Security
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True  # Enable with HTTPS
+SESSION_COOKIE_AGE = 3600
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_COOKIE_SAMESITE = 'Strict'
+
+# CSRF
+CSRF_COOKIE_SECURE = True  # Enable with HTTPS
+CSRF_COOKIE_HTTPONLY = True
+
+# Enable password validators (uncomment existing ones)
+
+================================================================================
+                              CONCLUSION
+================================================================================
+
+The philhealth_eKonsulta application has improved with CRUD role checks, but
+still contains critical vulnerabilities that MUST be addressed:
+
+1. BROKEN: Logout URL has a space - users cannot log out
+2. BROKEN: No LOGIN_URL - @login_required sends to non-existent page
+3. VULNERABLE: Dashboard views lack role verification
+4. EXPOSED: Credentials hardcoded in source code
+
+Priority: Fix items 1-2 immediately for basic functionality.
+          Fix items 3-4 before any production deployment.
+
+================================================================================
+Report Generated: December 9, 2025
+Analyst: Claude Code Security Analysis
+Next Review: After fixes implemented
+================================================================================
