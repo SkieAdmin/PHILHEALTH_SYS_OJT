@@ -84,10 +84,10 @@ if DOCKER_MODE:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'eKonsulta_db',
-            'USER': 'admin',
-            'PASSWORD': 'admin123',
-            'HOST': 'localhost',   # Django is outside Docker → use localhost
-            'PORT': '9095',        # Port forwarded from Docker to host
+            'USER': 'postgres',
+            'PASSWORD': 'password1',
+            'HOST': 'localhost',   
+            'PORT': '5432',      
         }
     }
 else:

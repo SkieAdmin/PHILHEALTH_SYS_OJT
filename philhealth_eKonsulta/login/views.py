@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 
@@ -33,22 +33,6 @@ def superadmin_login_view(request):
         else:
             return render(request, "login/superadmin_login.html", {"error": "Invalid SuperAdmin credentials"})
     return render(request, "login/superadmin_login.html")
-
-@login_required
-def superadmin_dashboard(request):
-    return render(request, "login/superadmin.html")
-
-@login_required
-def doctor_dashboard(request):
-    return render(request, "login/doctor.html")
-
-@login_required
-def secretary_dashboard(request):
-    return render(request, "login/secretary.html")
-
-@login_required
-def finance_dashboard(request):
-    return render(request, "login/finance.html")
 
 # CRUD
 @login_required
@@ -89,3 +73,24 @@ def delete_user_view(request, user_id):
     user = get_object_or_404(User, id=user_id)
     user.delete()
     return redirect("list_users")
+
+
+
+
+@login_required
+def superadmin_dashboard(request):
+    return render(request, "login/superadmin.html")
+@login_required
+def doctor_dashboard(request):
+    return render(request, "login/doctor.html")
+@login_required
+def secretary_dashboard(request):
+    return render(request, "login/secretary.html")
+@login_required
+def finance_dashboard(request):
+    return render(request, "login/finance.html")
+
+
+def user_logout(request):
+    logout(request)
+    return redirect("login")

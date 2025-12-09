@@ -3,6 +3,7 @@ from .import views
 
 urlpatterns = [
     path('login/', views.login_view, name="login"),
+    path(' ', views.user_logout, name="logout"),
     path('superadmin-login/', views.superadmin_login_view, name="superadmin_login"),
     path('superadmin-dashboard/', views.superadmin_dashboard, name="superadmin_dashboard"),
     path('doctor-dashboard/', views.doctor_dashboard, name="doctor_dashboard"),

@@ -16,6 +16,6 @@ class Command(BaseCommand):
                 role = "SUPERADMIN",
                 email = Config_Email
             )
-            self.stdout.write(self.style.SUCCESS("SuperAdmin created: U = admin, P = admin123"))
+            self.stdout.write(self.style.SUCCESS("SuperAdmin Successfully"))
         else:
             self.stdout.write(self.style.SUCCESS("SuperAdmin already exists"))
