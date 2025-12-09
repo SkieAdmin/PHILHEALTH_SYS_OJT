@@ -1,3 +1,4 @@
+# login/urls.py
 from django.urls import path
 from .import views
 
@@ -15,4 +16,9 @@ urlpatterns = [
     path('list-users/', views.list_users_view, name="list_users"),
     path('update-user/<int:user_id>/', views.update_user_view, name="update_user"),
     path('delete-user/<int:user_id>/', views.delete_user_view, name="delete_user"),
+    
+    # Registration URLs #new
+    path('doctor-registration/', views.doctor_registration, name='doctor_registration'),
+    path('secretary-registration/', views.secretary_registration, name='secretary_registration'),
+    path('finance-registration/', views.finance_registration, name='finance_registration'),
 ]

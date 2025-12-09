@@ -1,19 +1,20 @@
 {% extends 'base.html' %}
-{% block title %}Create User{% endblock %}
+{% block title %}Select Role{% endblock %}
 {% block content %}
-<h2>Create New Account</h2>
+<h2>Select Account Role</h2>
+
 <form method="post">
     {% csrf_token %}
-    <label>Username:</label>
-    <input type="text" name="username" required><br>
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
-    <label>Role:</label>
+
+    <label>Select Role:</label>
     <select name="role" required>
+        <option disabled selected>Choose Role</option>
         <option value="DOCTOR">Doctor</option>
         <option value="SECRETARY">Secretary</option>
         <option value="FINANCE">Finance</option>
-    </select><br>
-    <button type="submit">Create</button>
+    </select><br><br>
+
+    <button type="submit">Proceed</button>
 </form>
+
 {% endblock %}
