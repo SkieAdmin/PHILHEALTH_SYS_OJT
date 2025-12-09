@@ -6,13 +6,15 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         User = get_user_model()
-
-        if not User.objects.filter(username = "admin").exists():
+        Config_User = input("[+] Enter the username for the superadmin: ")
+        Config_Pass = input("[+] Enter the password for the superadmin: ")
+        Config_Email = input("[+] Enter the email for the superadmin: ")
+        if not User.objects.filter(username = Config_User).exists():
             User.objects.create_superuser(
-                username = "admin",
-                password = "admin123",
+                username = Config_User,
+                password = Config_Pass,
                 role = "SUPERADMIN",
-                email = "admin@example.com"
+                email = Config_Email
             )
             self.stdout.write(self.style.SUCCESS("SuperAdmin created: U = admin, P = admin123"))
         else:

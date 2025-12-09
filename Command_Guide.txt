@@ -1,0 +1,3 @@
+Create Predetermined / Pre-Setup Admin Configuration
+( python manage.py create_superadmin )
+--------------------------------------------------------
