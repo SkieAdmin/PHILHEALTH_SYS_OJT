@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from django.db import IntegrityError
+from django.db.models import Q
 
 from .models import DoctorProfile, SecretaryProfile, FinanceProfile
 
@@ -82,15 +83,65 @@ def create_user_view(request):
 
     return render(request, "login/create_user.html")
 
-
+#(Gocotano) -
+# --------------------------------------------------------------------------------------
 @login_required
 def list_users_view(request):
     if request.user.role != "SUPERADMIN":
         return render(request, "login/error.html", {"message": "Access denied."})
 
-    users = User.objects.exclude(role="SUPERADMIN")
-    return render(request, "login/list_users.html", {"users": users})
+    #(Hide Patient too, tangina yarns)
+    users = User.objects.exclude(role__in=["SUPERADMIN", "PATIENT"])
+    # users = User.objects.exclude(role="SUPERADMIN")
 
+    search_query = request.GET.get("search_query", "")
+
+    # Get full name for each user from their profile
+    user_list = []
+    for user in users:
+        full_name = ""
+        if user.role == "DOCTOR":
+            profile = DoctorProfile.objects.filter(user=user).first()
+        elif user.role == "SECRETARY":
+            profile = SecretaryProfile.objects.filter(user=user).first()
+        elif user.role == "FINANCE":
+            profile = FinanceProfile.objects.filter(user=user).first()
+        else:
+            profile = None
+
+        if profile:
+            full_name = f"{profile.first_name} {profile.last_name}"
+
+        user_list.append({"user": user, "full_name": full_name})
+
+    # Filter by search query (username, role, or full name)
+    if search_query:
+        user_list = [
+            item for item in user_list
+            if search_query.lower() in item["user"].username.lower()
+            or search_query.lower() in item["user"].role.lower()
+            or search_query.lower() in item["full_name"].lower()
+        ]
+
+    return render(request, "login/list_users.html", {"user_list": user_list})
+
+#(Added by Gocotano) --- View Account Information (Viewed by Admin)
+# --------------------------------------------------------------------------------------
+@login_required
+def view_user_view(request, user_id):
+    if request.user.role != "SUPERADMIN":
+        return render(request, "login/error.html", {"message": "Access denied."})
+
+    user = get_object_or_404(User, id=user_id)
+    profile = None
+    if user.role == "DOCTOR":
+        profile = DoctorProfile.objects.filter(user=user).first()
+    elif user.role == "SECRETARY":
+        profile = SecretaryProfile.objects.filter(user=user).first()
+    elif user.role == "FINANCE":
+        profile = FinanceProfile.objects.filter(user=user).first()
+    return render(request, "login/view_user.html", {"user": user, "profile": profile})
+# --------------------------------------------------------------------------------------
 
 @login_required
 def update_user_view(request, user_id):
@@ -168,8 +219,7 @@ def doctor_registration(request):
                 email=email
             )
 
-            messages.success(request, "Doctor registered successfully!")
-            return redirect("doctor_registration")
+            return redirect("/list-users/?registered=doctor")
 
         except IntegrityError:
             messages.error(request, "Error creating doctor account.")
