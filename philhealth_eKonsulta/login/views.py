@@ -305,3 +305,4 @@ def secretary_dashboard(request):
         return render(request, "login/error.html", {"message": "Access denied"})
     secretary_profile = get_object_or_404(SecretaryProfile, user = request.user)
     return render(request, "landing_pages/secretary.html",{"secretary": secretary_profile})
+
