@@ -7,11 +7,9 @@ from django.contrib import messages
 from django.db import IntegrityError
 
 from .models import DoctorProfile, SecretaryProfile, FinanceProfile
+from .forms import PatientForm
 
 User = get_user_model()
-
-
-
 
 
 # -------------------------
@@ -290,6 +288,10 @@ def user_logout(request):
     logout(request)
     return redirect("login")
 
+def admin_logout(request):
+    logout(request)
+    return redirect("superadmin_logout")
+
 #-------------------------------------
 #     get inforamtion for the users
 #-------------------------------------
@@ -305,4 +307,5 @@ def secretary_dashboard(request):
         return render(request, "login/error.html", {"message": "Access denied"})
     secretary_profile = get_object_or_404(SecretaryProfile, user = request.user)
     return render(request, "landing_pages/secretary.html",{"secretary": secretary_profile})
+
 

@@ -5,5 +5,21 @@
 <a href="{% url 'create_user' %}">Create New User</a> |
 <a href="{% url 'list_users' %}">Manage Users</a><br>
 
-<a href="{% url 'logout' %}">logout</a>
+<div>
+    <a href="{% url 'create_user' %}">
+        <button type="button">Create New User</button>
+    </a>
+    <br/>
+    <br/>
+    <a href="{% url 'list_users' %}">
+        <button type="button">Manage Users</button>
+    </a>
+    <br/>
+    <br/>
+    <a href="{% url 'superadmin_logout' %}">
+        <button type="button">Logout</button>
+    </a>
+</div>
+
+
 {% endblock %}

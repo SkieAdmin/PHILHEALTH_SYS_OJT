@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, DoctorProfile, SecretaryProfile, FinanceProfile
+from .models import CustomUser, DoctorProfile, SecretaryProfile, FinanceProfile, Patient
 
 #admin
 @admin.register(CustomUser)
@@ -38,11 +38,9 @@ class FinanceProfileAdmin(admin.ModelAdmin):
     search_fields = ('employee_id', 'position', 'user_name', 'user_email')
     list_filter = ('position',)
 
-# admin.site.register(CustomUser)
-# admin.site.register(DoctorProfile)
-# admin.site.register(SecretaryProfile)
-# admin.site.register(FinanceProfile)
-
-
-
+@admin.register(Patient)
+class PatientAdmin(admin.ModelAdmin):
+    list_display = ('first_name', 'last_name', 'birth_date', 'gender', 'contact_number', 'email', 'address', 'created_at')
+    search_fields = ('first_name', 'last_name', 'email')
+    list_filter = ('gender','created_at')
 # Register your models here.
