@@ -16,6 +16,8 @@ urlpatterns = [
     # CRUD
     path('create-user/', views.create_user_view, name="create_user"),
     path('list-users/', views.list_users_view, name="list_users"),
+    #(Added by Gocotano) - View User brub
+    path('view-user/<int:user_id>/', views.view_user_view, name="view_user"),
     path('update-user/<int:user_id>/', views.update_user_view, name="update_user"),
     path('delete-user/<int:user_id>/', views.delete_user_view, name="delete_user"),
     
