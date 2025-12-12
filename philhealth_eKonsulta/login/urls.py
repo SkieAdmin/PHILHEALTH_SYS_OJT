@@ -6,8 +6,10 @@ urlpatterns = [
     # path('', views.index, name="index"),
 
     path('login/', views.login_view, name="login"),
-    path('login/', views.user_logout, name="logout"),
+    path(' ', views.user_logout, name="logout"),
     path('superadmin-login/', views.superadmin_login_view, name="superadmin_login"),
+    path('superadmin-login/', views.admin_logout, name="superadmin_logout"),
+
     path('superadmin-dashboard/', views.superadmin_dashboard, name="superadmin_dashboard"),
     path('doctor-dashboard/', views.doctor_dashboard, name="doctor_dashboard"),
     path('secretary-dashboard/', views.secretary_dashboard, name="secretary_dashboard"),
