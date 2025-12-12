@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Doctor Dashboard{% endblock %}
+{% block content %}
+<h2>Welcome, Doctor {{ doctor.last_name}}</h2>
+
+<div class="sidebars_buttons">
+    <button>Dashboard</button>
+    <button>Patients</button>
+    <button>Medicine</button>
+    <button>Calendar</button>
+    <button>My Profile</button>
+    <button>Settings</button>
+    <button>Sign out</button>
+</div>
+<a href="{% url 'logout' %}">Sign Out</a>
+
+{% endblock %}
