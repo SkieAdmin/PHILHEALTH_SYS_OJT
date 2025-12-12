@@ -2,6 +2,8 @@
 from django.urls import path
 from .import views
 
+app_name = 'login'
+
 urlpatterns = [
     # path('', views.index, name="index"),
 
@@ -14,7 +16,7 @@ urlpatterns = [
     path('doctor-dashboard/', views.doctor_dashboard, name="doctor_dashboard"),
     path('secretary-dashboard/', views.secretary_dashboard, name="secretary_dashboard"),
     path('finance-dashboard/', views.finance_dashboard, name="finance_dashboard"),
-
+    
     # CRUD
     path('create-user/', views.create_user_view, name="create_user"),
     path('list-users/', views.list_users_view, name="list_users"),

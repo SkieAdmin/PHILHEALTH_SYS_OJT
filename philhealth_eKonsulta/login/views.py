@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.db import IntegrityError
 
 from .models import DoctorProfile, SecretaryProfile, FinanceProfile
-from .forms import PatientForm
+
 
 User = get_user_model()
 
@@ -116,7 +116,6 @@ def delete_user_view(request, user_id):
     return redirect("list_users")
 
 
-# -------------------------
 #   REGISTRATION FUNCTIONS
 # -------------------------
 
@@ -256,7 +255,7 @@ def finance_registration(request):
     return render(request, "user_registration/finance_registration.html")
 
 
-# -------------------------
+
 #        DASHBOARDS
 # -------------------------
 
@@ -280,7 +279,6 @@ def finance_dashboard(request):
     return render(request, "landing_pages/finance.html")
 
 
-# -------------------------
 #        LOGOUT
 # -------------------------
 
@@ -292,7 +290,7 @@ def admin_logout(request):
     logout(request)
     return redirect("superadmin_logout")
 
-#-------------------------------------
+
 #     get inforamtion for the users
 #-------------------------------------
 
@@ -307,5 +305,9 @@ def secretary_dashboard(request):
         return render(request, "login/error.html", {"message": "Access denied"})
     secretary_profile = get_object_or_404(SecretaryProfile, user = request.user)
     return render(request, "landing_pages/secretary.html",{"secretary": secretary_profile})
+
+
+
+
 
 
