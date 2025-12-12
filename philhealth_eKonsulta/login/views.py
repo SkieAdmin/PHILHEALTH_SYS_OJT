@@ -94,6 +94,12 @@ def list_users_view(request):
 
     search_query = request.GET.get("search_query", "")
 
+    # (Gocotano) - Added Role Filter (12/12/2025) ---------------- )
+    role_filter = request.GET.get("role_filter", "")
+    if role_filter:
+        users = users.filter(role=role_filter)
+    # (Gocotano) ---------------------------------------------- )
+
     # Get full name for each user from their profile
     user_list = []
     for user in users:
