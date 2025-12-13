@@ -1,0 +1,127 @@
+<!-- Add by Gocotano - as of 2025-12-13 -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Patient Details</h2>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <td>{{ patient.id }}</td>
+        </tr>
+        <tr>
+            <th>First Name</th>
+            <td>{{ patient.first_name }}</td>
+        </tr>
+        <tr>
+            <th>Last Name</th>
+            <td>{{ patient.last_name }}</td>
+        </tr>
+        <tr>
+            <th>Birth Date</th>
+            <td>{{ patient.birth_date }}</td>
+        </tr>
+        <tr>
+            <th>Gender</th>
+            <td>{{ patient.gender }}</td>
+        </tr>
+        <tr>
+            <th>Contact Number</th>
+            <td>{{ patient.contact_number }}</td>
+        </tr>
+        <tr>
+            <th>Email</th>
+            <td>{{ patient.email|default:"N/A" }}</td>
+        </tr>
+        <tr>
+            <th>Address</th>
+            <td>{{ patient.address|default:"N/A" }}</td>
+        </tr>
+        <tr>
+            <th>Medical History</th>
+            <td>{{ patient.medical_history|default:"N/A" }}</td>
+        </tr>
+        <tr>
+            <th>Created At</th>
+            <td>{{ patient.created_at }}</td>
+        </tr>
+    </table>
+
+    <!-- Add by Gocotano - as of 2025-12-13 - Display Medical Record Documents -->
+    <h3>Medical Record Documents</h3>
+    {% if patient.documents.all %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Document</th>
+                <th>Description</th>
+                <th>Uploaded At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doc in patient.documents.all %}
+            <tr>
+                <td><a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a></td>
+                <td>{{ doc.description|default:"N/A" }}</td>
+                <td>{{ doc.uploaded_at }}</td>
+                <td>
+                    <form method="post" action="{% url 'delete_patient_document' doc.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No documents uploaded.</p>
+    {% endif %}
+
+    <br>
+
+    <!-- Add by Gocotano - as of 2025-12-13 - Display Patient Pictures -->
+    <h3>Patient Pictures</h3>
+    {% if patient.pictures.all %}
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Picture</th>
+                <th>Caption</th>
+                <th>Uploaded At</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pic in patient.pictures.all %}
+            <tr>
+                <td>
+                    <a href="{{ pic.picture.url }}" target="_blank">
+                        <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient picture' }}" width="150">
+                    </a>
+                </td>
+                <td>{{ pic.caption|default:"N/A" }}</td>
+                <td>{{ pic.uploaded_at }}</td>
+                <td>
+                    <form method="post" action="{% url 'delete_patient_picture' pic.pk %}">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No pictures uploaded.</p>
+    {% endif %}
+
+    <br>
+
+    <div>
+        <a href="{% url 'patient_update' patient.id %}"><button type="button">Edit</button></a>
+        <a href="{% url 'patient_list' %}"><button type="button">Back to List</button></a>
+    </div>
+</div>
+{% endblock %}

@@ -1,36 +1,118 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
-from .models import Appointment, Patient
-from .forms import AppointmentForm, PatientForm
+from .models import Appointment, Patient, PatientDocument, PatientPicture
+from .forms import AppointmentForm, PatientForm, SingleDocumentForm, SinglePictureForm
+# Add by Gocotano - as of 2025-12-13
+from django.db.models import Q
 
 
 
 #       Patient CRUD
 #-------------------------------------
+# Update by Gocotano - as of 2025-12-13 - Added search filter
 def patient_list(request):
-    patients = Patient.objects.all()
-    return render(request, 'patient/patient_list.html', {'patients': patients})
+    search_query = request.GET.get('search', '')
+    if search_query:
+        patients = Patient.objects.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(contact_number__icontains=search_query) |
+            Q(address__icontains=search_query)
+        )
+    else:
+        patients = Patient.objects.all()
+    return render(request, 'patient/patient_list.html', {'patients': patients, 'search_query': search_query})
 
+# Update by Gocotano - as of 2025-12-13 - Added file uploads
 def patient_create(request):
     if request.method == 'POST':
         form = PatientForm(request.POST)
+        document_form = SingleDocumentForm(request.POST, request.FILES)
+        picture_form = SinglePictureForm(request.POST, request.FILES)
+
         if form.is_valid():
-            form.save()
+            patient = form.save()
+
+            # Handle single document upload
+            if 'document' in request.FILES:
+                doc = request.FILES['document']
+                description = request.POST.get('description', '')
+                PatientDocument.objects.create(
+                    patient=patient,
+                    document=doc,
+                    original_filename=doc.name,
+                    description=description
+                )
+
+            # Handle single picture upload
+            if 'picture' in request.FILES:
+                pic = request.FILES['picture']
+                caption = request.POST.get('caption', '')
+                PatientPicture.objects.create(
+                    patient=patient,
+                    picture=pic,
+                    original_filename=pic.name,
+                    caption=caption
+                )
+
             return redirect('patient_list')
     else:
         form = PatientForm()
-    return render(request, 'patient/patient_form.html', {'form': form})
+        document_form = SingleDocumentForm()
+        picture_form = SinglePictureForm()
 
+    return render(request, 'patient/patient_form.html', {
+        'form': form,
+        'document_form': document_form,
+        'picture_form': picture_form
+    })
+
+# Update by Gocotano - as of 2025-12-13 - Added file uploads
 def patient_update(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
     if request.method == 'POST':
         form = PatientForm(request.POST, instance=patient)
+        document_form = SingleDocumentForm(request.POST, request.FILES)
+        picture_form = SinglePictureForm(request.POST, request.FILES)
+
         if form.is_valid():
             form.save()
-            return redirect('patient_list')
+
+            # Handle single document upload
+            if 'document' in request.FILES:
+                doc = request.FILES['document']
+                description = request.POST.get('description', '')
+                PatientDocument.objects.create(
+                    patient=patient,
+                    document=doc,
+                    original_filename=doc.name,
+                    description=description
+                )
+
+            # Handle single picture upload
+            if 'picture' in request.FILES:
+                pic = request.FILES['picture']
+                caption = request.POST.get('caption', '')
+                PatientPicture.objects.create(
+                    patient=patient,
+                    picture=pic,
+                    original_filename=pic.name,
+                    caption=caption
+                )
+
+            return redirect('patient_detail', pk=patient.pk)
     else:
         form = PatientForm(instance=patient)
-    return render(request, 'patient/patient_form.html', {'form': form})
+        document_form = SingleDocumentForm()
+        picture_form = SinglePictureForm()
+
+    return render(request, 'patient/patient_form.html', {
+        'form': form,
+        'document_form': document_form,
+        'picture_form': picture_form,
+        'patient': patient
+    })
 
 def patient_delete(request, pk):
     patient = get_object_or_404(Patient, pk=pk)
@@ -38,6 +120,29 @@ def patient_delete(request, pk):
         patient.delete()
         return redirect('patient_list')
     return render(request, 'patient/patient_confirm_delete.html', {'patient': patient})
+
+# Add by Gocotano - as of 2025-12-13
+def patient_detail(request, pk):
+    patient = get_object_or_404(Patient, pk=pk)
+    return render(request, 'patient/patient_detail.html', {'patient': patient})
+
+# Add by Gocotano - as of 2025-12-13
+def delete_patient_document(request, pk):
+    document = get_object_or_404(PatientDocument, pk=pk)
+    patient_pk = document.patient.pk
+    if request.method == 'POST':
+        document.document.delete()
+        document.delete()
+    return redirect('patient_detail', pk=patient_pk)
+
+# Add by Gocotano - as of 2025-12-13
+def delete_patient_picture(request, pk):
+    picture = get_object_or_404(PatientPicture, pk=pk)
+    patient_pk = picture.patient.pk
+    if request.method == 'POST':
+        picture.picture.delete()
+        picture.delete()
+    return redirect('patient_detail', pk=patient_pk)
 
 
 #       Appointment

@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t6l*-(@i&a9c-7@sp_4j*(e%^+6757&w&_z7wcx6x97re&()$x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Set to ( Docker / Live / Sol )
-DATABASE_MODE = "Sol"
+DATABASE_MODE = "Docker"
 
 ALLOWED_HOSTS = []
 
@@ -152,3 +152,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Add by Gocotano - as of 2025-12-13
+# Media files (Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

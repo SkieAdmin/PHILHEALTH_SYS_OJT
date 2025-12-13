@@ -1,21 +1,37 @@
+<!-- Update by Gocotano - as of 2025-12-13 -->
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-3">Patient List</h2>
-    <a href="{% url 'patient_create' %}" class="btn btn-primary mb-3">
-        <button type="button">Add new patient</button>
-    </a>
-    <a href="{% url 'secretary_dashboard' %}"><button type="button">Back to Dashboard</button></a>
+    <h2>Patient List</h2>
+    <!-- Add by Gocotano - as of 2025-12-13 - Back Button -->
+    <div>
+        <a href="{% url 'patient_create' %}"><button type="button">Add New Patient</button></a>
+        <a href="{% url 'secretary_dashboard' %}"><button type="button">Back</button></a>
+    </div>
+    <br>
+
+    <!-- Add by Gocotano - as of 2025-12-13 - Search Filter -->
+    <form method="get" action="{% url 'patient_list' %}">
+        <label for="search">Search:</label>
+        <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Search by name, email, contact, or address">
+        <button type="submit">Search</button>
+        {% if search_query %}
+        <a href="{% url 'patient_list' %}"><button type="button">Clear</button></a>
+        {% endif %}
+    </form>
+
+    <br>
 
     <table class="table table-striped table-bordered">
-        <thead class="table-dark">
+        <thead>
             <tr>
                 <th>ID</th>
-                <th>Name</th>
+                <th>Full Name</th>
                 <th>Birth Date</th>
                 <th>Gender</th>
-                <th>Contact</th>
+                <th>Contact Number</th>
                 <th>Email</th>
+                <th>Address</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,22 +43,24 @@
                 <td>{{ patient.birth_date }}</td>
                 <td>{{ patient.gender }}</td>
                 <td>{{ patient.contact_number }}</td>
-                <td>{{ patient.email }}</td>
+                <td>{{ patient.email|default:"N/A" }}</td>
+                <td>{{ patient.address|default:"N/A" }}</td>
                 <td>
-                    <a href="{% url 'patient_update' patient.id %}" class="btn btn-sm btn-warning">
-                        <button type="button">Edit</button>
-                    </a>
-                    <a href="{% url 'patient_delete' patient.id %}" class="btn btn-sm btn-danger">
-                        <button type="button">Delete</button>
-                    </a>
+                    <a href="{% url 'patient_detail' patient.id %}"><button type="button">View</button></a>
+                    <a href="{% url 'patient_update' patient.id %}"><button type="button">Edit</button></a>
+                    <a href="{% url 'patient_delete' patient.id %}"><button type="button">Delete</button></a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="7" class="text-center">No patients found.</td>
+                <td colspan="8">No patients found.</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    <p>Total Patients: {{ patients|length }}</p>
+
+
 </div>
 {% endblock %}
