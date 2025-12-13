@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2> Appointments </h2>
+<a href="{% url 'appointment_create' %}"><button type="button">Add appoitment</button></a>
+<a href="{% url 'secretary_dashboard' %}"><button  type="button">Back to dashboard</button></a>
+
+<table>
+    <tr>
+        <th>Patient</th><th>Doctor</th><th>Date</th><th>Time</th><th>Status</th><th>Actions</th>
+    </tr>
+    {% for appt in appointments %}
+    <tr>
+        <td>{{ appt.patient }}</td>
+        <td>{{ appt.doctor }}</td>
+        <td>{{ appt.date }}</td>
+        <td>{{ appt.time }}</td>
+        <td>{{ appt.status }}</td>
+        <td>
+            <a href="{% url 'appointment_update' appt.pk %}"><button type="button">Update</button></a>
+            <a href="{% url 'appointment_delete' appt.pk %}"><button type="button">Delete</button></a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}
