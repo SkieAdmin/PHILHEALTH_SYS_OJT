@@ -147,6 +147,24 @@ def view_user_view(request, user_id):
     return render(request, "login/view_user.html", {"user": user, "profile": profile})
 # --------------------------------------------------------------------------------------
 
+
+# @login_required
+# def update_user_view(request, user_id):
+#     if request.user.role != "SUPERADMIN":
+#         return render(request, "login/error.html", {"message": "Access denied."})
+
+#     user = get_object_or_404(User, id=user_id)
+
+#     if request.method == "POST":
+#         user.username = request.POST["username"]
+#         user.role = request.POST["role"]
+#         user.save()
+#         return redirect("list_users")
+
+#     return render(request, "login/create_user.html", {"user": user})
+
+# ____________________________________________________________________________________________________
+# (Updated by Gocotano) - Update user with all profile information 🫠🫠
 @login_required
 def update_user_view(request, user_id):
     if request.user.role != "SUPERADMIN":
@@ -154,13 +172,45 @@ def update_user_view(request, user_id):
 
     user = get_object_or_404(User, id=user_id)
 
+    # (Gocotano Changes) - Get the profile based on role
+    profile = None
+    if user.role == "DOCTOR":
+        profile = DoctorProfile.objects.filter(user=user).first()
+    elif user.role == "SECRETARY":
+        profile = SecretaryProfile.objects.filter(user=user).first()
+    elif user.role == "FINANCE":
+        profile = FinanceProfile.objects.filter(user=user).first()
+
     if request.method == "POST":
+        # Update user account info
         user.username = request.POST["username"]
+        user.email = request.POST["email"]
         user.role = request.POST["role"]
         user.save()
-        return redirect("list_users")
 
-    return render(request, "login/create_user.html", {"user": user})
+        # (Gocotano Changes) - Update profile info if profile exists
+        if profile:
+            profile.first_name = request.POST.get("first_name", profile.first_name)
+            profile.last_name = request.POST.get("last_name", profile.last_name)
+            profile.employee_id = request.POST.get("employee_id", profile.employee_id)
+            profile.phone = request.POST.get("phone", profile.phone)
+            profile.email = request.POST.get("profile_email", profile.email)
+
+            # Role-specific fields
+            if user.role == "DOCTOR" and hasattr(profile, 'specialization'):
+                profile.specialization = request.POST.get("specialization", profile.specialization)
+                profile.license_number = request.POST.get("license_number", profile.license_number)
+            elif user.role == "SECRETARY" and hasattr(profile, 'department'):
+                profile.department = request.POST.get("department", profile.department)
+            elif user.role == "FINANCE" and hasattr(profile, 'position'):
+                profile.position = request.POST.get("position", profile.position)
+            profile.save()
+        # (End Gocotano Changes)
+        return redirect("list_users")
+    return render(request, "login/update_user.html", {"user": user, "profile": profile})
+# ____________________________________________________________________________________________________
+# (End Updated by Gocotano)
+
 
 
 @login_required
