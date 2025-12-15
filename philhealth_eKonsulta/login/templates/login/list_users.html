@@ -18,23 +18,24 @@
     }
 </script>
 
-<!-- (Added by Gocotano) Implementing Search Filter, then refresh the site with the parameter of search_query. -->
-<form method="GET" action="">
-    <label for="search_query">Search by Name:</label>
-    <input type="text" id="search_query" name="search_query" value="{{ request.GET.search_query|default_if_none:'' }}">
-
-    <!-- (Gocotano Changes) - Added Role Filter Dropdown -->
-    <label for="role_filter">View by Role:</label>
-    <select id="role_filter" name="role_filter">
-        <option value="" {% if not request.GET.role_filter %}selected{% endif %}>All</option>
-        <option value="DOCTOR" {% if request.GET.role_filter == "DOCTOR" %}selected{% endif %}>Doctor</option>
-        <option value="FINANCE" {% if request.GET.role_filter == "FINANCE" %}selected{% endif %}>Finance</option>
-        <option value="SECRETARY" {% if request.GET.role_filter == "SECRETARY" %}selected{% endif %}>Secretary</option>
-    </select>
-    <!-- (End Gocotano Changes) -->
-
-    <button type="submit">Search</button>
-</form>
+<!-- (12/15/2025) - Added by Gocotano - Container structure with Sidebar -->
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'superadmin_dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'list_users' %}">Manage Users</a>
+                </li>
+            </ul>
+        </div>
+        <!-- (12/15/2025) - End Sidebar -->
 
         <!-- Main Content -->
         <div class="col-md-10">
@@ -45,11 +46,19 @@
                     <p class="text-muted mb-0">View and manage all created accounts</p>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <form method="GET" action="" class="d-flex gap-2">
-                        <input type="text" class="form-control" id="search_query" name="search_query" 
+                    <!-- (12/15/2025) - Modified by Gocotano - Added Role Filter to search form -->
+                    <form method="GET" action="" class="d-flex gap-2 align-items-center">
+                        <input type="text" class="form-control" id="search_query" name="search_query"
                                placeholder="Search by name..." value="{{ request.GET.search_query|default_if_none:'' }}">
+                        <select class="form-select" id="role_filter" name="role_filter" style="width: auto;">
+                            <option value="" {% if not request.GET.role_filter %}selected{% endif %}>All Roles</option>
+                            <option value="DOCTOR" {% if request.GET.role_filter == "DOCTOR" %}selected{% endif %}>Doctor</option>
+                            <option value="SECRETARY" {% if request.GET.role_filter == "SECRETARY" %}selected{% endif %}>Secretary</option>
+                            <option value="FINANCE" {% if request.GET.role_filter == "FINANCE" %}selected{% endif %}>Finance</option>
+                        </select>
                         <button type="submit" class="btn btn-primary">🔍</button>
                     </form>
+                    <!-- (12/15/2025) - End Role Filter -->
                     <button class="btn">🌙</button>
                 </div>
             </div>
