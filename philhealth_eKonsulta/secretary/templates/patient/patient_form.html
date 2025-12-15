@@ -1,0 +1,87 @@
+<!-- Update by Gocotano - as of 2025-12-13 -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ form.instance.pk|yesno:"Update Patient,Add New Patient" }}</h2>
+
+    <!-- Add by Gocotano - as of 2025-12-13 - Added enctype for file uploads -->
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h3>Patient Information</h3>
+        {{ form.as_p }}
+
+        <br>
+
+        <!-- Add by Gocotano - as of 2025-12-13 - Document Upload Section -->
+        <h3>Medical Record Document (Optional)</h3>
+        <p>Upload a document related to the patient's medical records. You can add more documents later by editing the patient.</p>
+        <p>
+            <label for="id_document">Document:</label><br>
+            <input type="file" name="document" id="id_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
+        </p>
+        <p>
+            <label for="id_description">Description:</label><br>
+            <input type="text" name="description" id="id_description" placeholder="Enter description for document">
+        </p>
+
+        <br>
+
+        <!-- Add by Gocotano - as of 2025-12-13 - Picture Upload Section -->
+        <h3>Patient Picture (Optional)</h3>
+        <p>Upload a picture of the patient. You can add more pictures later by editing the patient.</p>
+        <p>
+            <label for="id_picture">Picture:</label><br>
+            <input type="file" name="picture" id="id_picture" accept="image/*">
+        </p>
+        <p>
+            <label for="id_caption">Caption:</label><br>
+            <input type="text" name="caption" id="id_caption" placeholder="Enter caption for picture">
+        </p>
+
+        <br>
+
+        <!-- Show existing documents and pictures when editing -->
+        {% if patient %}
+            {% if patient.documents.all %}
+            <h3>Existing Documents</h3>
+            <ul>
+                {% for doc in patient.documents.all %}
+                <li>
+                    <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
+                    {% if doc.description %} - {{ doc.description }}{% endif %}
+                    <form method="post" action="{% url 'delete_patient_document' doc.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+
+            {% if patient.pictures.all %}
+            <h3>Existing Pictures</h3>
+            <ul>
+                {% for pic in patient.pictures.all %}
+                <li>
+                    <a href="{{ pic.picture.url }}" target="_blank">
+                        <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient picture' }}" width="100">
+                    </a>
+                    {% if pic.caption %} - {{ pic.caption }}{% endif %}
+                    <form method="post" action="{% url 'delete_patient_picture' pic.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endif %}
+
+        <br>
+
+        <button type="submit">Save</button>
+        <a href="{% url 'patient_list' %}"><button type="button">Cancel</button></a>
+    </form>
+</div>
+{% endblock %}

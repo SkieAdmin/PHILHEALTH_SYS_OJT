@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">Delete appointment</h2>
+    <p>Are you sure you want to delete <strong>{{ patient.first_name }} {{ patient.last_name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+        <a href="{% url 'patient_list' %}" class="btn btn-secondary"><button type="button">Cancel</button></a>
+    </form>
+</div>
+{% endblock %}

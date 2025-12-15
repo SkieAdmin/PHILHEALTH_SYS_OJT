@@ -366,9 +366,102 @@ def finance_registration(request):
 #        DASHBOARDS
 # -------------------------
 
+# ____________________________________________________________________________________________________
+# (12/15/2025) - Modified by Gocotano
+# Combined user registration into superadmin dashboard (no more separate registration pages)
+# ____________________________________________________________________________________________________
+
+# (12/15/2025) - COMMENTED OUT OLD CODE by Gocotano ------------------------------------------------
+# @login_required
+# def superadmin_dashboard(request):
+#     return render(request, "landing_pages/superadmin.html")
+# (12/15/2025) - END COMMENTED OUT OLD CODE --------------------------------------------------------
+
+# (12/15/2025) - NEW CODE by Gocotano - Handle user creation directly on dashboard -----------------
 @login_required
 def superadmin_dashboard(request):
+    if request.user.role != "SUPERADMIN":
+        return render(request, "login/error.html", {"message": "Access denied."})
+
+    if request.method == "POST":
+        role = request.POST.get("role")
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        first_name = request.POST.get("first_name")
+        last_name = request.POST.get("last_name")
+        employee_id = request.POST.get("employee_id")
+        phone = request.POST.get("phone")
+        email = request.POST.get("email")
+
+        # Validate required fields
+        if not all([role, username, password, first_name, last_name, employee_id, phone, email]):
+            messages.error(request, "All fields are required.")
+            return render(request, "landing_pages/superadmin.html")
+
+        # Check for duplicate username/email
+        if User.objects.filter(username=username).exists():
+            messages.error(request, "Username already taken.")
+            return render(request, "landing_pages/superadmin.html")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email already in use.")
+            return render(request, "landing_pages/superadmin.html")
+
+        try:
+            user = User.objects.create_user(
+                username=username,
+                password=password,
+                role=role,
+                email=email,
+                is_staff=True,
+                is_active=True
+            )
+
+            if role == "DOCTOR":
+                specialization = request.POST.get("specialization")
+                license_number = request.POST.get("license_number")
+                DoctorProfile.objects.create(
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                    employee_id=employee_id,
+                    specialization=specialization,
+                    license_number=license_number,
+                    phone=phone,
+                    email=email
+                )
+            elif role == "SECRETARY":
+                department = request.POST.get("department")
+                SecretaryProfile.objects.create(
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                    employee_id=employee_id,
+                    department=department,
+                    phone=phone,
+                    email=email
+                )
+            elif role == "FINANCE":
+                position = request.POST.get("position")
+                FinanceProfile.objects.create(
+                    user=user,
+                    first_name=first_name,
+                    last_name=last_name,
+                    employee_id=employee_id,
+                    position=position,
+                    phone=phone,
+                    email=email
+                )
+
+            messages.success(request, f"{role.title()} account created successfully!")
+            return redirect("superadmin_dashboard")
+
+        except IntegrityError:
+            messages.error(request, "Error creating user account.")
+            return render(request, "landing_pages/superadmin.html")
+
     return render(request, "landing_pages/superadmin.html")
+# (12/15/2025) - END NEW CODE by Gocotano ---------------------------------------------------------
 
 
 @login_required

@@ -1,23 +1,27 @@
+from django.shortcuts import render, redirect, get_list_or_404
+
 from django.db import models
+from login.models import DoctorProfile
 # Add by Gocotano - as of 2025-12-13
 import uuid
 import os
 
-from django.db import models
-
-# _________________________________________________________________________
 # Add by Gocotano - as of 2025-12-13
-# Function to generate random filename for documents & ID
+# Function to generate random filename for documents
 def document_upload_path(instance, filename):
-    ext = os.path.splitext(filename)[1]  # Get file extension like (.txt and etc)
-    random_filename = f"{uuid.uuid4()}{ext}" #combine random UUID to become like bwfiwfwj.txt
+    ext = os.path.splitext(filename)[1]
+    random_filename = f"{uuid.uuid4()}{ext}"
     return f"patient_documents/{random_filename}"
 
+# Add by Gocotano - as of 2025-12-13
+# Function to generate random filename for pictures
 def picture_upload_path(instance, filename):
-    ext = os.path.splitext(filename)[1]  # Get file extension
+    ext = os.path.splitext(filename)[1]
     random_filename = f"{uuid.uuid4()}{ext}"
     return f"patient_pictures/{random_filename}"
-# _________________________________________________________________________
+
+#   patient table
+#----------------------------------
 
 class Patient(models.Model):
     first_name = models.CharField(max_length=100)
@@ -29,18 +33,35 @@ class Patient(models.Model):
     address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     medical_history = models.TextField(blank=True, null=True)
-
+    
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+    
+#   Appointment table
+#------------------------------------
+class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('Pending','Pending'),
+        ('Confirmed','Confirmed'),
+        ('Cancelled','Cancelled'),
+    ]
 
-# _________________________________________________________________________
+    patient = models.ForeignKey(Patient, on_delete = models.CASCADE)
+    doctor = models.ForeignKey(DoctorProfile, on_delete = models.CASCADE)
+    date = models.DateField()
+    time = models.TimeField()
+    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, default = 'pending')
+    notes = models.TextField(blank = True)
+
+    def __str__(self):
+        return f"{self.patient} with {self.doctor} on {self.date} at {self.time}"
+
 # Add by Gocotano - as of 2025-12-13
 # Model for Medical Record Documents (optional, multiple uploads allowed)
 class PatientDocument(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='documents')
-    # Update by Gocotano - as of 2025-12-13 - Use random filename
     document = models.FileField(upload_to=document_upload_path)
-    original_filename = models.CharField(max_length=255, blank=True, null=True)  # Store original filename
+    original_filename = models.CharField(max_length=255, blank=True, null=True)
     description = models.CharField(max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
@@ -51,13 +72,10 @@ class PatientDocument(models.Model):
 # Model for Patient Pictures (optional, multiple uploads allowed, no limit)
 class PatientPicture(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='pictures')
-    # Update by Gocotano - as of 2025-12-13 - Use random filename
     picture = models.ImageField(upload_to=picture_upload_path)
-    original_filename = models.CharField(max_length=255, blank=True, null=True)  # Store original filename
+    original_filename = models.CharField(max_length=255, blank=True, null=True)
     caption = models.CharField(max_length=255, blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
-# _________________________________________________________________________
 
     def __str__(self):
         return f"Picture for {self.patient} - {self.caption or 'No caption'}"
