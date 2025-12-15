@@ -1,11 +1,57 @@
 {% extends 'base.html' %}
-{% block content%}
-<h2>Schedule Appointment</h2>
-<form method="POST">
-    {% csrf_token %}
-    {{ form.as_p}}
-    <button type="submit">Save</button>
-    <a href="{% url 'appointment_list' %}"><button type="button">Back</button></a>
+{% load static %}
 
-</form>
-{% endblock content%}
+{% block title %}Schedule Appointment{% endblock %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous">
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'secretary_dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'patient_list' %}">Patients</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'appointment_list' %}">Appointments</a>
+                </li>
+            </ul>
+            <div class="position-absolute bottom-0 w-100 p-3">
+                <a href="{% url 'logout' %}" class="d-block text-decoration-none">Sign Out</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                <h2>Schedule Appointment</h2>
+                <a href="{% url 'appointment_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+
+            <!-- Appointment Form Card -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-primary">Save</button>
+                        <a href="{% url 'appointment_list' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
