@@ -1,17 +1,248 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Doctor Dashboard{% endblock %}
+
 {% block content %}
-<h2>Welcome, Doctor {{ doctor.last_name}}</h2>
 
-<div class="sidebars_buttons">
-    <button>Dashboard</button>
-    <button>Patients</button>
-    <button>Medicine</button>
-    <button>Calendar</button>
-    <button>My Profile</button>
-    <button>Settings</button>
-    
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
+      rel="stylesheet" 
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+      crossorigin="anonymous">
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Patients</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Medicine</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Calendar</a>
+                </li>
+            </ul>
+            
+            <!-- Bottom Navigation -->
+            <div class="position-absolute bottom-0 w-100 p-3">
+                <a href="#" class="d-block text-decoration-none mb-2">My Profile</a>
+                <a href="#" class="d-block text-decoration-none mb-2">Settings</a>
+                <a href="{% url 'logout' %}" class="d-block text-decoration-none">Sign Out</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                <div>
+                    <h2>Dashboard</h2>
+                    <p class="text-muted mb-0">Welcome! Doctor {{ doctor.last_name }}</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <input type="text" class="form-control" placeholder="Search...">
+                    <button class="btn">🔍</button>
+                    <button class="btn">🌙</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mt-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>Doctor Icon</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>Medicine Icon</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div>Calendar Icon</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Patient List and Calendar Section -->
+            <div class="row mt-4">
+                <!-- Patient List -->
+                <div class="col-md-7">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <h4>Patient</h4>
+                            <p class="text-muted mb-0">This is your several latest patient list</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm">
+                                <option>Sort: A - Z</option>
+                            </select>
+                            <a href="#" class="btn btn-sm btn-link">See All</a>
+                        </div>
+                    </div>
+
+                    <!-- Patient Cards -->
+                    <div class="list-group">
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">Avatar</div>
+                                <div>
+                                    <h6 class="mb-0">Adam Massey</h6>
+                                    <small class="text-muted">#756456</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span>#756456</span>
+                                <span>June 1, 2023</span>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">Avatar</div>
+                                <div>
+                                    <h6 class="mb-0">Celina Alustizia</h6>
+                                    <small class="text-muted">#56478</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-warning">Low</span>
+                                <span>May 28, 2023</span>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">Avatar</div>
+                                <div>
+                                    <h6 class="mb-0">Malik Al Arab</h6>
+                                    <small class="text-muted">#67889</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-danger">High</span>
+                                <span>June 1, 2023</span>
+                            </div>
+                        </div>
+
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="me-3">Avatar</div>
+                                <div>
+                                    <h6 class="mb-0">Mathias Olivera</h6>
+                                    <small class="text-muted">#92657</small>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <span class="badge bg-secondary">Medium</span>
+                                <span>June 1, 2023</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="col-md-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5>June 2023</h5>
+                                <div>
+                                    <button class="btn btn-sm">&lt;</button>
+                                    <button class="btn btn-sm">&gt;</button>
+                                </div>
+                            </div>
+
+                            <!-- Calendar Legend -->
+                            <div class="d-flex gap-3 mb-3">
+                                <span><span class="badge bg-danger"></span> Surgery</span>
+                                <span><span class="badge bg-success"></span> Psychiatric</span>
+                                <span><span class="badge bg-warning"></span> Evaluation</span>
+                            </div>
+
+                            <!-- Calendar Grid -->
+                            <table class="table table-borderless text-center">
+                                <thead>
+                                    <tr>
+                                        <th>S</th>
+                                        <th>M</th>
+                                        <th>T</th>
+                                        <th>W</th>
+                                        <th>T</th>
+                                        <th>F</th>
+                                        <th>S</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td>1</td>
+                                        <td>2</td>
+                                        <td>3</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td>5</td>
+                                        <td>6</td>
+                                        <td>7</td>
+                                        <td class="bg-primary text-white">8</td>
+                                        <td>9</td>
+                                        <td>10</td>
+                                    </tr>
+                                    <tr>
+                                        <td>11</td>
+                                        <td>12</td>
+                                        <td>13</td>
+                                        <td>14</td>
+                                        <td>15</td>
+                                        <td>16</td>
+                                        <td>17</td>
+                                    </tr>
+                                    <tr>
+                                        <td>18</td>
+                                        <td>19</td>
+                                        <td>20</td>
+                                        <td>21</td>
+                                        <td>22</td>
+                                        <td>23</td>
+                                        <td>24</td>
+                                    </tr>
+                                    <tr>
+                                        <td>25</td>
+                                        <td>26</td>
+                                        <td>27</td>
+                                        <td>28</td>
+                                        <td>29</td>
+                                        <td>30</td>
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-<a href="{% url 'logout' %}"><button>Sign out</button></a>
 
-{% endblock %}
+{% endblock %}  
