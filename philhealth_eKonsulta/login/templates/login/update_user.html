@@ -1,91 +1,171 @@
 {% extends 'base.html' %}
+{% load static %}
+
 {% block title %}Update User{% endblock %}
+
 {% block content %}
 
-<!-- (Gocotano Changes) - Created update_user.html template for editing all user information -->
-<h2>Update Account</h2>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
+      rel="stylesheet" 
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+      crossorigin="anonymous">
 
-<form method="post">
-    {% csrf_token %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'superadmin_dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'list_users' %}">Manage Users</a>
+                </li>
+            </ul>
+        </div>
 
-    <h3>Account Information</h3>
-    <table border="1">
-        <tr>
-            <th>Username</th>
-            <td><input type="text" name="username" value="{{ user.username }}" required></td>
-        </tr>
-        <tr>
-            <th>Email</th>
-            <td><input type="email" name="email" value="{{ user.email }}" required></td>
-        </tr>
-        <tr>
-            <th>Role</th>
-            <td>
-                <select name="role" required>
-                    <option value="DOCTOR" {% if user.role == "DOCTOR" %}selected{% endif %}>Doctor</option>
-                    <option value="SECRETARY" {% if user.role == "SECRETARY" %}selected{% endif %}>Secretary</option>
-                    <option value="FINANCE" {% if user.role == "FINANCE" %}selected{% endif %}>Finance</option>
-                </select>
-            </td>
-        </tr>
-    </table>
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                <div>
+                    <h2>Update Account</h2>
+                    <p class="text-muted mb-0">Edit user account information</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <input type="text" class="form-control" placeholder="Search...">
+                    <button class="btn">🔍</button>
+                    <button class="btn">🌙</button>
+                </div>
+            </div>
 
-    {% if profile %}
-    <h3>Profile Information</h3>
-    <table border="1">
-        <tr>
-            <th>First Name</th>
-            <td><input type="text" name="first_name" value="{{ profile.first_name }}" required></td>
-        </tr>
-        <tr>
-            <th>Last Name</th>
-            <td><input type="text" name="last_name" value="{{ profile.last_name }}" required></td>
-        </tr>
-        <tr>
-            <th>Employee ID</th>
-            <td><input type="text" name="employee_id" value="{{ profile.employee_id }}" required></td>
-        </tr>
+            <!-- Update Form -->
+            <form method="post" class="mt-4">
+                {% csrf_token %}
 
-        <!-- (Gocotano Changes) - Role-specific fields -->
-        {% if user.role == "DOCTOR" %}
-        <tr>
-            <th>Specialization</th>
-            <td><input type="text" name="specialization" value="{{ profile.specialization }}" required></td>
-        </tr>
-        <tr>
-            <th>License Number</th>
-            <td><input type="text" name="license_number" value="{{ profile.license_number }}" required></td>
-        </tr>
-        {% elif user.role == "SECRETARY" %}
-        <tr>
-            <th>Department</th>
-            <td><input type="text" name="department" value="{{ profile.department }}" required></td>
-        </tr>
-        {% elif user.role == "FINANCE" %}
-        <tr>
-            <th>Position</th>
-            <td><input type="text" name="position" value="{{ profile.position }}" required></td>
-        </tr>
-        {% endif %}
-        <!-- (End Role-specific fields) -->
+                <!-- Account Information Section -->
+                <div class="mb-4">
+                    <h3>Account Information</h3>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th>Username</th>
+                                <td>
+                                    <input type="text" class="form-control" name="username" value="{{ user.username }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>
+                                    <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Role</th>
+                                <td>
+                                    <select class="form-select" name="role" required>
+                                        <option value="DOCTOR" {% if user.role == "DOCTOR" %}selected{% endif %}>Doctor</option>
+                                        <option value="SECRETARY" {% if user.role == "SECRETARY" %}selected{% endif %}>Secretary</option>
+                                        <option value="FINANCE" {% if user.role == "FINANCE" %}selected{% endif %}>Finance</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-        <tr>
-            <th>Phone</th>
-            <td><input type="text" name="phone" value="{{ profile.phone }}" required></td>
-        </tr>
-        <tr>
-            <th>Profile Email</th>
-            <td><input type="email" name="profile_email" value="{{ profile.email }}" required></td>
-        </tr>
-    </table>
-    {% else %}
-    <p>No profile information available for this user.</p>
-    {% endif %}
+                <!-- Profile Information Section -->
+                {% if profile %}
+                <div class="mb-4">
+                    <h3>Profile Information</h3>
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th>First Name</th>
+                                <td>
+                                    <input type="text" class="form-control" name="first_name" value="{{ profile.first_name }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Last Name</th>
+                                <td>
+                                    <input type="text" class="form-control" name="last_name" value="{{ profile.last_name }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Employee ID</th>
+                                <td>
+                                    <input type="text" class="form-control" name="employee_id" value="{{ profile.employee_id }}" required>
+                                </td>
+                            </tr>
 
-    <br>
-    <button type="submit">Update</button>
-    <a href="{% url 'list_users' %}"><button type="button">Cancel</button></a>
-</form>
-<!-- (End Gocotano Changes) -->
+                            <!-- Role-specific fields -->
+                            {% if user.role == "DOCTOR" %}
+                            <tr>
+                                <th>Specialization</th>
+                                <td>
+                                    <input type="text" class="form-control" name="specialization" value="{{ profile.specialization }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>License Number</th>
+                                <td>
+                                    <input type="text" class="form-control" name="license_number" value="{{ profile.license_number }}" required>
+                                </td>
+                            </tr>
+                            {% elif user.role == "SECRETARY" %}
+                            <tr>
+                                <th>Department</th>
+                                <td>
+                                    <input type="text" class="form-control" name="department" value="{{ profile.department }}" required>
+                                </td>
+                            </tr>
+                            {% elif user.role == "FINANCE" %}
+                            <tr>
+                                <th>Position</th>
+                                <td>
+                                    <input type="text" class="form-control" name="position" value="{{ profile.position }}" required>
+                                </td>
+                            </tr>
+                            {% endif %}
+
+                            <tr>
+                                <th>Phone</th>
+                                <td>
+                                    <input type="text" class="form-control" name="phone" value="{{ profile.phone }}" required>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Profile Email</th>
+                                <td>
+                                    <input type="email" class="form-control" name="profile_email" value="{{ profile.email }}" required>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    No profile information available for this user.
+                </div>
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="{% url 'list_users' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+
+            <!-- Bottom Navigation -->
+            <div class="mt-5 py-3 border-top">
+                <a href="{% url 'superadmin_logout' %}" class="text-decoration-none">Logout</a>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

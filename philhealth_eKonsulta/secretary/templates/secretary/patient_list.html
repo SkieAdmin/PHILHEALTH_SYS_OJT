@@ -1,67 +1,134 @@
 <!-- Update by Gocotano - as of 2025-12-13 -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Patient List{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>Patient List</h2>
 
-    <div>
-        <a href="{% url 'patient_create' %}"><button type="button">Add New Patient</button></a>
-        <a href="{% url 'secretary_dashboard' %}"><button type="button">Back to Dashboard</button></a>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
+      rel="stylesheet" 
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+      crossorigin="anonymous">
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'secretary_dashboard' %}">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'patient_list' %}">Patients</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'appointment_list' %}">Appointment</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Registration</a>
+                </li>
+            </ul>
+            
+            <!-- Bottom Navigation -->
+            <div class="position-absolute bottom-0 w-100 p-3">
+                <a href="#" class="d-block text-decoration-none mb-2">My Profile</a>
+                <a href="#" class="d-block text-decoration-none mb-2">Settings</a>
+                <a href="{% url 'logout' %}" class="d-block text-decoration-none">Sign Out</a>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                <div>
+                    <h2>Patient List</h2>
+                    <p class="text-muted mb-0">Manage and view all patient records</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="{% url 'patient_create' %}" class="btn btn-primary">Add New Patient</a>
+                    <button class="btn">🌙</button>
+                </div>
+            </div>
+
+            <!-- Search Filter -->
+            <div class="mt-4">
+                <form method="get" action="{% url 'patient_list' %}" class="row g-3">
+                    <div class="col-auto">
+                        <label for="search" class="col-form-label">Search:</label>
+                    </div>
+                    <div class="col-auto flex-grow-1">
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search_query }}" placeholder="Search by name, email, contact, or address">
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                    {% if search_query %}
+                    <div class="col-auto">
+                        <a href="{% url 'patient_list' %}" class="btn btn-secondary">Clear</a>
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+
+            <!-- Patient Table -->
+            <div class="mt-4">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Full Name</th>
+                            <th>Birth Date</th>
+                            <th>Gender</th>
+                            <th>Contact Number</th>
+                            <th>Email</th>
+                            <th>Address</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for patient in patients %}
+                        <tr>
+                            <td>{{ patient.id }}</td>
+                            <td>{{ patient.first_name }} {{ patient.last_name }}</td>
+                            <td>{{ patient.birth_date }}</td>
+                            <td>{{ patient.gender }}</td>
+                            <td>{{ patient.contact_number }}</td>
+                            <td>{{ patient.email|default:"N/A" }}</td>
+                            <td>{{ patient.address|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'patient_detail' patient.id %}" class="btn btn-sm btn-info">View</a>
+                                <a href="{% url 'patient_update' patient.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'patient_delete' patient.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center">No patients found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <p><strong>Total Patients:</strong> {{ patients|length }}</p>
+            </div>
+
+            <!-- Bottom Navigation -->
+            <div class="mt-5 py-3 border-top">
+                <a href="{% url 'logout' %}" class="text-decoration-none">Sign Out</a>
+            </div>
+        </div>
     </div>
-
-    <br>
-
-    <!-- Add by Gocotano - as of 2025-12-13 - Search Filter -->
-    <form method="get" action="{% url 'patient_list' %}">
-        <label for="search">Search:</label>
-        <input type="text" id="search" name="search" value="{{ search_query }}" placeholder="Search by name, email, contact, or address">
-        <button type="submit">Search</button>
-        {% if search_query %}
-        <a href="{% url 'patient_list' %}"><button type="button">Clear</button></a>
-        {% endif %}
-    </form>
-
-    <br>
-
-    <table class="table table-striped table-bordered">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Full Name</th>
-                <th>Birth Date</th>
-                <th>Gender</th>
-                <th>Contact Number</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for patient in patients %}
-            <tr>
-                <td>{{ patient.id }}</td>
-                <td>{{ patient.first_name }} {{ patient.last_name }}</td>
-                <td>{{ patient.birth_date }}</td>
-                <td>{{ patient.gender }}</td>
-                <td>{{ patient.contact_number }}</td>
-                <td>{{ patient.email|default:"N/A" }}</td>
-                <td>{{ patient.address|default:"N/A" }}</td>
-                <td>
-                    <a href="{% url 'patient_detail' patient.id %}"><button type="button">View</button></a>
-                    <a href="{% url 'patient_update' patient.id %}"><button type="button">Edit</button></a>
-                    <a href="{% url 'patient_delete' patient.id %}"><button type="button">Delete</button></a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8">No patients found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <p>Total Patients: {{ patients|length }}</p>
 </div>
+
 {% endblock %}
 
 <!--

@@ -1,87 +1,220 @@
-<!-- Update by Gocotano - as of 2025-12-13 -->
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ form.instance.pk|yesno:"Update Patient,Add New Patient" }}{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <h2>{{ form.instance.pk|yesno:"Update Patient,Add New Patient" }}</h2>
 
-    <!-- Add by Gocotano - as of 2025-12-13 - Added enctype for file uploads -->
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
+      rel="stylesheet" 
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+      crossorigin="anonymous">
 
-        <h3>Patient Information</h3>
-        {{ form.as_p }}
-
-        <br>
-
-        <!-- Add by Gocotano - as of 2025-12-13 - Document Upload Section -->
-        <h3>Medical Record Document (Optional)</h3>
-        <p>Upload a document related to the patient's medical records. You can add more documents later by editing the patient.</p>
-        <p>
-            <label for="id_document">Document:</label><br>
-            <input type="file" name="document" id="id_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
-        </p>
-        <p>
-            <label for="id_description">Description:</label><br>
-            <input type="text" name="description" id="id_description" placeholder="Enter description for document">
-        </p>
-
-        <br>
-
-        <!-- Add by Gocotano - as of 2025-12-13 - Picture Upload Section -->
-        <h3>Patient Picture (Optional)</h3>
-        <p>Upload a picture of the patient. You can add more pictures later by editing the patient.</p>
-        <p>
-            <label for="id_picture">Picture:</label><br>
-            <input type="file" name="picture" id="id_picture" accept="image/*">
-        </p>
-        <p>
-            <label for="id_caption">Caption:</label><br>
-            <input type="text" name="caption" id="id_caption" placeholder="Enter caption for picture">
-        </p>
-
-        <br>
-
-        <!-- Show existing documents and pictures when editing -->
-        {% if patient %}
-            {% if patient.documents.all %}
-            <h3>Existing Documents</h3>
-            <ul>
-                {% for doc in patient.documents.all %}
-                <li>
-                    <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
-                    {% if doc.description %} - {{ doc.description }}{% endif %}
-                    <form method="post" action="{% url 'delete_patient_document' doc.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Delete</button>
-                    </form>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-2 bg-light vh-100 p-0">
+            <div class="text-center py-4">
+                <div class="mb-4">LOGO</div>
+            </div>
+            <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'secretary_dashboard' %}">Dashboard</a>
                 </li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-
-            {% if patient.pictures.all %}
-            <h3>Existing Pictures</h3>
-            <ul>
-                {% for pic in patient.pictures.all %}
-                <li>
-                    <a href="{{ pic.picture.url }}" target="_blank">
-                        <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient picture' }}" width="100">
-                    </a>
-                    {% if pic.caption %} - {{ pic.caption }}{% endif %}
-                    <form method="post" action="{% url 'delete_patient_picture' pic.pk %}" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit">Delete</button>
-                    </form>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'patient_list' %}">Patients</a>
                 </li>
-                {% endfor %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'appointment_list' %}">Appointment</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Notifications</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Registration</a>
+                </li>
             </ul>
-            {% endif %}
-        {% endif %}
+            
+            <!-- Bottom Navigation -->
+            <div class="position-absolute bottom-0 w-100 p-3">
+                <a href="#" class="d-block text-decoration-none mb-2">My Profile</a>
+                <a href="#" class="d-block text-decoration-none mb-2">Settings</a>
+                <a href="{% url 'logout' %}" class="d-block text-decoration-none">Sign Out</a>
+            </div>
+        </div>
 
-        <br>
+        <!-- Main Content -->
+        <div class="col-md-10">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+                <div>
+                    <h2>{{ form.instance.pk|yesno:"Update Patient,Add New Patient" }}</h2>
+                    <p class="text-muted mb-0">Enter patient information</p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <button class="btn">🌙</button>
+                </div>
+            </div>
 
-        <button type="submit">Save</button>
-        <a href="{% url 'patient_list' %}"><button type="button">Cancel</button></a>
-    </form>
+            <!-- Patient Form -->
+            <form method="post" enctype="multipart/form-data" class="mt-4">
+                {% csrf_token %}
+
+                <!-- Patient Information Section -->
+                <div class="mb-4">
+                    <h3>Patient Information</h3>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+                            {{ form.last_name }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.birth_date.id_for_label }}" class="form-label">Birth Date</label>
+                            {{ form.birth_date }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.gender.id_for_label }}" class="form-label">Gender</label>
+                            {{ form.gender }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.contact_number.id_for_label }}" class="form-label">Contact Number</label>
+                            {{ form.contact_number }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.address.id_for_label }}" class="form-label">Address</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.medical_history.id_for_label }}" class="form-label">Medical History</label>
+                            {{ form.medical_history }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical Record Document Upload Section -->
+                <div class="mb-4">
+                    <h3>Medical Record Document (Optional)</h3>
+                    <p class="text-muted">Upload a document related to the patient's medical records. You can add more documents later by editing the patient.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_document" class="form-label">Document:</label>
+                            <input type="file" class="form-control" name="document" id="id_document" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_description" class="form-label">Description:</label>
+                            <input type="text" class="form-control" name="description" id="id_description" placeholder="Enter description for document">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Patient Picture Upload Section -->
+                <div class="mb-4">
+                    <h3>Patient Picture (Optional)</h3>
+                    <p class="text-muted">Upload a picture of the patient. You can add more pictures later by editing the patient.</p>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_picture" class="form-label">Picture:</label>
+                            <input type="file" class="form-control" name="picture" id="id_picture" accept="image/*">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="id_caption" class="form-label">Caption:</label>
+                            <input type="text" class="form-control" name="caption" id="id_caption" placeholder="Enter caption for picture">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Existing Documents Section -->
+                {% if patient %}
+                    {% if patient.documents.all %}
+                    <div class="mb-4">
+                        <h3>Existing Documents</h3>
+                        <ul class="list-group">
+                            {% for doc in patient.documents.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
+                                    {% if doc.description %}<span class="text-muted"> - {{ doc.description }}</span>{% endif %}
+                                </div>
+                                <form method="post" action="{% url 'delete_patient_document' doc.pk %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    {% if patient.pictures.all %}
+                    <div class="mb-4">
+                        <h3>Existing Pictures</h3>
+                        <div class="row">
+                            {% for pic in patient.pictures.all %}
+                            <div class="col-md-3 mb-3">
+                                <div class="card">
+                                    <a href="{{ pic.picture.url }}" target="_blank">
+                                        <img src="{{ pic.picture.url }}" class="card-img-top" alt="{{ pic.caption|default:'Patient picture' }}">
+                                    </a>
+                                    <div class="card-body">
+                                        {% if pic.caption %}<p class="card-text">{{ pic.caption }}</p>{% endif %}
+                                        <form method="post" action="{% url 'delete_patient_picture' pic.pk %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger w-100">Delete</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+
+                <!-- Action Buttons -->
+                <div class="mb-4">
+                    <button type="submit" class="btn btn-primary">Save</button>
+                    <a href="{% url 'patient_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+
+            <!-- Bottom Navigation -->
+            <div class="mt-5 py-3 border-top">
+                <a href="{% url 'logout' %}" class="text-decoration-none">Sign Out</a>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+// Add Bootstrap form-control class to all form inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const formInputs = document.querySelectorAll('input:not([type="file"]):not([type="submit"]), select, textarea');
+    formInputs.forEach(input => {
+        input.classList.add('form-control');
+    });
+});
+</script>
+
 {% endblock %}
