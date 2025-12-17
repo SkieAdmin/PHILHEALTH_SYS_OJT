@@ -3,10 +3,13 @@
 
 <h2>Patient Details</h2>
 
-<p><strong>Name:</strong> {{ patient.name }}</p>
-<p><strong>Age:</strong> {{ patient.age }}</p>
+<!-- [12-17-2025 - Gocotano] - Updated patient info display -->
+<p><strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
+<!-- (Old Code) - <p><strong>Name:</strong> {{ patient.name }}</p> -->
+<p><strong>Age:</strong> {{ patient.birth_date }}</p>
 <p><strong>Gender:</strong> {{ patient.gender }}</p>
-<p><strong>Contact:</strong> {{ patient.contact }}</p>
+<p><strong>Contact:</strong> {{ patient.contact_number }}</p>
+<!-- (Old Code) - <p><strong>Contact:</strong> {{ patient.contact }}</p> -->
 
 <h3>Appointment Info</h3>
 <p><strong>Date:</strong> {{ appointment.date }}</p>
@@ -14,6 +17,62 @@
 <p><strong>Status:</strong> {{ appointment.status }}</p>
 <p><strong>Notes:</strong> {{ appointment.notes }}</p>
 
-<a href="{% url 'doctor_appt_list' %}">back</a>
+<!-- [12-17-2025 - Gocotano] - Appointment Actions -->
+<h4>Actions</h4>
+<div style="margin-bottom: 15px;">
+    {% if appointment.status == "PENDING" %}
+        <a href="{% url 'update_appointment_status' appointment.id 'APPROVE' %}"><button type="button" style="padding: 5px 10px; background-color: green; color: white; margin-right: 5px;">Accept Appointment</button></a>
+        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Reject Appointment</button></a>
+    {% elif appointment.status == "APPROVE" %}
+        <a href="{% url 'update_appointment_status' appointment.id 'COMPLETED' %}"><button type="button" style="padding: 5px 10px; background-color: blue; color: white;">Mark Completed</button></a>
+        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Cancel Appointment</button></a>
+    {% else %}
+        <p><em>No actions available for this status.</em></p>
+    {% endif %}
+</div>
+
+<!-- [12-17-2025 - Gocotano] - Medical History Section -->
+<h3>Medical History</h3>
+{% if patient.medical_history %}
+    <p>{{ patient.medical_history }}</p>
+{% else %}
+    <p><em>No medical history recorded.</em></p>
+{% endif %}
+
+<!-- [12-17-2025 - Gocotano] - Documents Section (Medical Records) -->
+<h3>Medical Records / Documents</h3>
+{% if documents %}
+    <ul>
+        {% for doc in documents %}
+            <li>
+                <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
+                {% if doc.description %} - {{ doc.description }}{% endif %}
+                <small>(Uploaded: {{ doc.uploaded_at|date:"M d, Y" }})</small>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p><em>No documents uploaded.</em></p>
+{% endif %}
+
+<!-- [12-17-2025 - Gocotano] - Patient ID/Pictures Section -->
+<h3>Patient ID / Pictures</h3>
+{% if pictures %}
+    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+        {% for pic in pictures %}
+            <div style="border: 1px solid #ccc; padding: 5px;">
+                <a href="{{ pic.picture.url }}" target="_blank">
+                    <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient Picture' }}" style="max-width: 150px; max-height: 150px;">
+                </a>
+                {% if pic.caption %}<p style="margin: 5px 0 0 0; font-size: 12px;">{{ pic.caption }}</p>{% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <p><em>No pictures/ID uploaded.</em></p>
+{% endif %}
+
+<br>
+<a href="{% url 'doctor_appt_list' %}"><button type="button">Back to Appointments</button></a>
 
 {% endblock content %}

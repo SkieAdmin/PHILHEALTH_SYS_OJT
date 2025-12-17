@@ -1,13 +1,27 @@
 {% extends 'base.html' %}
 {% block content%}
 
+<!-- [12-17-2025 - Gocotano] - Search and Status Filter -->
+<form method="GET" action="" style="margin-bottom: 15px;">
+    <input type="text" name="search" placeholder="Search patient name..." value="{{ search_query|default:'' }}" style="padding: 5px; width: 200px;">
+    <select name="status" style="padding: 5px;">
+        <option value="">All Status</option>
+        <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+        <option value="COMPLETED" {% if status_filter == 'COMPLETED' %}selected{% endif %}>Completed</option>
+        <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+        <option value="APPROVE" {% if status_filter == 'APPROVE' %}selected{% endif %}>Approved</option>
+    </select>
+    <button type="submit" style="padding: 5px 10px;">Filter</button>
+    <a href="{% url 'doctor_appt_list' %}" style="margin-left: 5px;"><button type="button" style="padding: 5px 10px;">Clear</button></a>
+</form>
+
 <table border="1" cellpadding="5">
     <tr>
-        
+
         <th>Patient</th>
         <th>Date</th>
         <th>Status</th>
-        <th>Action</th>
+        <!-- (Old Code) - <th>Action</th> -->
     </tr>
     {% for appt in appointments %}
     <tr>
@@ -16,16 +30,17 @@
         </td>
         <th>{{ appt.date }}</th>
         <th>{{ appt.status }}</th>
-        <td>
+        <!-- (Old Code) - Action column removed, balhin na ang action sa view, bawas tapulanz -->
+        <!-- <td>
             {% if appt.status == "PENDING" %}
             <a href="{% url 'update_appointment_status' appt.id 'APPROVED' %}">Approve</a>
             <a href="{% url 'update_appointment_status' appt.id 'CANCELLED' %}">Reject</a>
             {% elif appt.status == "APPROVED" %}
             <a href=" {% url 'update_appointment_status' appt.id 'COMPLETED' %}">Mark Completed</a>
             {% endif %}
-        </td>
+        </td> -->
     </tr>
-   
+
     {% endfor %}
 </table>
  <a href="{% url 'doctor_dashboard' %}"><button type="button">Back to dashboard</button></a>
