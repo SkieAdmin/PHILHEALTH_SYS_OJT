@@ -4,15 +4,38 @@
 {% block title %}Patient Details{% endblock %}
 
 {% block content %}
-<!-- Header -->
-<div class="d-flex justify-content-between align-items-center py-3 border-bottom mb-4">
-    <div>
-        <h2>Patient Details</h2>
-        <p class="text-muted mb-0">{{ patient.first_name }} {{ patient.last_name }}</p>
-    </div>
-    <div>
-        <a href="{% url 'doctor_appt_list' %}" class="btn btn-secondary">Back to Appointments</a>
-    </div>
+
+<h2>Patient Details</h2>
+
+<!-- [12-17-2025 - Gocotano] - Updated patient info display -->
+<p><strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
+<!-- (Old Code) - <p><strong>Name:</strong> {{ patient.name }}</p> -->
+<p><strong>Age:</strong> {{ patient.birth_date }}</p>
+<p><strong>Gender:</strong> {{ patient.gender }}</p>
+<p><strong>Contact:</strong> {{ patient.contact_number }}</p>
+<!-- (Old Code) - <p><strong>Contact:</strong> {{ patient.contact }}</p> -->
+
+<h3>Appointment Info</h3>
+<p><strong>Date:</strong> {{ appointment.date }}</p>
+<p><strong>Time:</strong> {{ appointment.time }}</p>
+<p><strong>Status:</strong> {{ appointment.status }}</p>
+<p><strong>Notes:</strong> {{ appointment.notes }}</p>
+
+<!-- [12-17-2025 - Gocotano] - Appointment Actions -->
+<h4>Actions</h4>
+<div style="margin-bottom: 15px;">
+    {% if appointment.status == "PENDING" %}
+        <a href="{% url 'update_appointment_status' appointment.id 'APPROVE' %}"><button type="button" style="padding: 5px 10px; background-color: green; color: white; margin-right: 5px;">Accept Appointment</button></a>
+        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Reject Appointment</button></a>
+    {% elif appointment.status == "APPROVE" %}
+        <a href="{% url 'add_consultation' appointment.id %}">
+            Start Consultation
+        </a>
+        <a href="{% url 'update_appointment_status' appointment.id 'COMPLETED' %}"><button type="button" style="padding: 5px 10px; background-color: blue; color: white;">Mark Completed</button></a>
+        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Cancel Appointment</button></a>
+    {% else %}
+        <p><em>No actions available for this status.</em></p>
+    {% endif %}
 </div>
 
 <div class="row">

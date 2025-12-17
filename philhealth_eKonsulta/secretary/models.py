@@ -81,9 +81,6 @@ class Appointment(models.Model):
 
 
 
-
-
-
 # Add by Gocotano - as of 2025-12-13
 # Model for Medical Record Documents (optional, multiple uploads allowed)
 class PatientDocument(models.Model):
