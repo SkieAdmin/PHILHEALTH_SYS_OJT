@@ -12,6 +12,7 @@ from django.db.models import Q
 # Update by Gocotano - as of 2025-12-13 - Added search filter
 def patient_list(request):
     search_query = request.GET.get('search', '')
+   
     if search_query:
         patients = Patient.objects.filter(
             Q(first_name__icontains=search_query) |
@@ -190,3 +191,7 @@ def secretary_dashboard(request):
         'upcoming':upcoming,
         'total_patients' : total_patients
     })
+
+
+
+

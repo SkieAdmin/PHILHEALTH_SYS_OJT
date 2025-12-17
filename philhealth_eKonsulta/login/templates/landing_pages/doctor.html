@@ -1,9 +1,6 @@
 {% extends 'base.html' %}
-{% load static %}
-
-{% block title %}Doctor Dashboard{% endblock %}
-
 {% block content %}
+<<<<<<< Updated upstream
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" 
       rel="stylesheet" 
@@ -51,3 +48,9 @@
 </div>
 
 {% endblock %}
+=======
+<h1>Welcome Dr.</h1>
+<a href="{% url 'doctor_appt_list' %}"><button type="button">Appointments List</button></a>
+<a href="{% url 'logout' %}"><button type="button">Sign Out</button></a>
+{% endblock content %}
+>>>>>>> Stashed changes

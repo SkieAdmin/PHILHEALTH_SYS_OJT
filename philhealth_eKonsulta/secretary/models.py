@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_list_or_404
-
+from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings
 from login.models import DoctorProfile
 # Add by Gocotano - as of 2025-12-13
 import uuid
@@ -36,25 +37,52 @@ class Patient(models.Model):
     
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
-    
-#   Appointment table
+
+
+
+#   Appointment table old
 #------------------------------------
+# class Appointment(models.Model):
+#     STATUS_CHOICES = [
+#         ('Pending','Pending'),
+#         ('Confirmed','Confirmed'),
+#         ('Cancelled','Cancelled'),
+#     ]
+
+#     patient = models.ForeignKey(Patient, on_delete = models.CASCADE)
+#     doctor = models.ForeignKey(DoctorProfile, on_delete = models.CASCADE)
+#     date = models.DateField()
+#     time = models.TimeField()
+#     status = models.CharField(max_length = 20, choices = STATUS_CHOICES, default = 'pending')
+#     notes = models.TextField(blank = True)
+
+#     def __str__(self):
+#         return f"{self.patient} with {self.doctor} on {self.date} at {self.time}"
+
 class Appointment(models.Model):
     STATUS_CHOICES = [
-        ('Pending','Pending'),
-        ('Confirmed','Confirmed'),
-        ('Cancelled','Cancelled'),
+        ('PENDING','Pending'),
+        ('APPROVE','Approve'),
+        ('CANCELLED','Cancelled'),
+        ('COMPLETED','Completed'),
     ]
 
-    patient = models.ForeignKey(Patient, on_delete = models.CASCADE)
-    doctor = models.ForeignKey(DoctorProfile, on_delete = models.CASCADE)
-    date = models.DateField()
+    patient = models.ForeignKey('Patient', on_delete = models.CASCADE)
+    doctor = models.ForeignKey(
+        DoctorProfile,
+        on_delete=models.CASCADE
+    )
+    date = models.DateTimeField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING')
     time = models.TimeField()
-    status = models.CharField(max_length = 20, choices = STATUS_CHOICES, default = 'pending')
-    notes = models.TextField(blank = True)
-
+    notes = models.TextField (blank = True)
     def __str__(self):
-        return f"{self.patient} with {self.doctor} on {self.date} at {self.time}"
+        return f"{self.patient} -  {self.date} ({self.status})"
+
+
+
+
+
 
 # Add by Gocotano - as of 2025-12-13
 # Model for Medical Record Documents (optional, multiple uploads allowed)

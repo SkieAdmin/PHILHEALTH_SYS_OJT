@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content%}
+
+<table border="1" cellpadding="5">
+    <tr>
+        
+        <th>Patient</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    {% for appt in appointments %}
+    <tr>
+        <td>
+            <a href="{% url 'patient_appt_detail' appt.id %}">{{ appt.patient }}</a>
+        </td>
+        <th>{{ appt.date }}</th>
+        <th>{{ appt.status }}</th>
+        <td>
+            {% if appt.status == "PENDING" %}
+            <a href="{% url 'update_appointment_status' appt.id 'APPROVED' %}">Approve</a>
+            <a href="{% url 'update_appointment_status' appt.id 'CANCELLED' %}">Reject</a>
+            {% elif appt.status == "APPROVED" %}
+            <a href=" {% url 'update_appointment_status' appt.id 'COMPLETED' %}">Mark Completed</a>
+            {% endif %}
+        </td>
+    </tr>
+   
+    {% endfor %}
+</table>
+ <a href="{% url 'doctor_dashboard' %}"><button type="button">Back to dashboard</button></a>
+
+{% endblock content%}
