@@ -12,27 +12,6 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-2 bg-light vh-100 p-0">
-            <div class="text-center py-4">
-                <div class="mb-4">LOGO</div>
-            </div>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'secretary_dashboard' %}">Dashboard</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'patient_list' %}">Patients</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'appointment_list' %}">Appointment</a>
-                </li>
-            </ul>
-            <!-- Bottom Navigation -->
-            <div class="position-absolute bottom-0 w-100 p-3">
-                <a href="{% url 'logout' %}" class="d-block text-decoration-none">Sign Out</a>
-            </div>
-        </div>
 
         <!-- Main Content -->
         <div class="col-md-10">

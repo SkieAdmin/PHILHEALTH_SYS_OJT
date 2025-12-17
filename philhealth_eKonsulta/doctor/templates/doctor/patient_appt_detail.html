@@ -1,78 +1,147 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Patient Details{% endblock %}
+
 {% block content %}
-
-<h2>Patient Details</h2>
-
-<!-- [12-17-2025 - Gocotano] - Updated patient info display -->
-<p><strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
-<!-- (Old Code) - <p><strong>Name:</strong> {{ patient.name }}</p> -->
-<p><strong>Age:</strong> {{ patient.birth_date }}</p>
-<p><strong>Gender:</strong> {{ patient.gender }}</p>
-<p><strong>Contact:</strong> {{ patient.contact_number }}</p>
-<!-- (Old Code) - <p><strong>Contact:</strong> {{ patient.contact }}</p> -->
-
-<h3>Appointment Info</h3>
-<p><strong>Date:</strong> {{ appointment.date }}</p>
-<p><strong>Time:</strong> {{ appointment.time }}</p>
-<p><strong>Status:</strong> {{ appointment.status }}</p>
-<p><strong>Notes:</strong> {{ appointment.notes }}</p>
-
-<!-- [12-17-2025 - Gocotano] - Appointment Actions -->
-<h4>Actions</h4>
-<div style="margin-bottom: 15px;">
-    {% if appointment.status == "PENDING" %}
-        <a href="{% url 'update_appointment_status' appointment.id 'APPROVE' %}"><button type="button" style="padding: 5px 10px; background-color: green; color: white; margin-right: 5px;">Accept Appointment</button></a>
-        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Reject Appointment</button></a>
-    {% elif appointment.status == "APPROVE" %}
-        <a href="{% url 'update_appointment_status' appointment.id 'COMPLETED' %}"><button type="button" style="padding: 5px 10px; background-color: blue; color: white;">Mark Completed</button></a>
-        <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}"><button type="button" style="padding: 5px 10px; background-color: red; color: white;">Cancel Appointment</button></a>
-    {% else %}
-        <p><em>No actions available for this status.</em></p>
-    {% endif %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center py-3 border-bottom mb-4">
+    <div>
+        <h2>Patient Details</h2>
+        <p class="text-muted mb-0">{{ patient.first_name }} {{ patient.last_name }}</p>
+    </div>
+    <div>
+        <a href="{% url 'doctor_appt_list' %}" class="btn btn-secondary">Back to Appointments</a>
+    </div>
 </div>
 
-<!-- [12-17-2025 - Gocotano] - Medical History Section -->
-<h3>Medical History</h3>
-{% if patient.medical_history %}
-    <p>{{ patient.medical_history }}</p>
-{% else %}
-    <p><em>No medical history recorded.</em></p>
-{% endif %}
-
-<!-- [12-17-2025 - Gocotano] - Documents Section (Medical Records) -->
-<h3>Medical Records / Documents</h3>
-{% if documents %}
-    <ul>
-        {% for doc in documents %}
-            <li>
-                <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
-                {% if doc.description %} - {{ doc.description }}{% endif %}
-                <small>(Uploaded: {{ doc.uploaded_at|date:"M d, Y" }})</small>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p><em>No documents uploaded.</em></p>
-{% endif %}
-
-<!-- [12-17-2025 - Gocotano] - Patient ID/Pictures Section -->
-<h3>Patient ID / Pictures</h3>
-{% if pictures %}
-    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
-        {% for pic in pictures %}
-            <div style="border: 1px solid #ccc; padding: 5px;">
-                <a href="{{ pic.picture.url }}" target="_blank">
-                    <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient Picture' }}" style="max-width: 150px; max-height: 150px;">
-                </a>
-                {% if pic.caption %}<p style="margin: 5px 0 0 0; font-size: 12px;">{{ pic.caption }}</p>{% endif %}
+<div class="row">
+    <!-- Patient Info -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Patient Information</h5>
             </div>
-        {% endfor %}
+            <div class="card-body">
+                <p><strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }}</p>
+                <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
+                <p><strong>Gender:</strong> {{ patient.gender }}</p>
+                <p><strong>Contact:</strong> {{ patient.contact_number }}</p>
+            </div>
+        </div>
     </div>
-{% else %}
-    <p><em>No pictures/ID uploaded.</em></p>
-{% endif %}
 
-<br>
-<a href="{% url 'doctor_appt_list' %}"><button type="button">Back to Appointments</button></a>
+    <!-- Appointment Info -->
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Appointment Information</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Date:</strong> {{ appointment.date }}</p>
+                <p><strong>Time:</strong> {{ appointment.time }}</p>
+                <p>
+                    <strong>Status:</strong>
+                    {% if appointment.status == 'PENDING' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif appointment.status == 'APPROVE' %}
+                        <span class="badge bg-success">Approved</span>
+                    {% elif appointment.status == 'COMPLETED' %}
+                        <span class="badge bg-primary">Completed</span>
+                    {% elif appointment.status == 'CANCELLED' %}
+                        <span class="badge bg-danger">Cancelled</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ appointment.status }}</span>
+                    {% endif %}
+                </p>
+                <p><strong>Notes:</strong> {{ appointment.notes|default:"No notes" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-{% endblock content %}
+<!-- Actions -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Actions</h5>
+    </div>
+    <div class="card-body">
+        {% if appointment.status == "PENDING" %}
+            <a href="{% url 'update_appointment_status' appointment.id 'APPROVE' %}" class="btn btn-success me-2">Accept Appointment</a>
+            <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}" class="btn btn-danger">Reject Appointment</a>
+        {% elif appointment.status == "APPROVE" %}
+            <a href="{% url 'update_appointment_status' appointment.id 'COMPLETED' %}" class="btn btn-primary me-2">Mark Completed</a>
+            <a href="{% url 'update_appointment_status' appointment.id 'CANCELLED' %}" class="btn btn-danger">Cancel Appointment</a>
+        {% else %}
+            <p class="text-muted mb-0">No actions available for this status.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Medical History -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Medical History</h5>
+    </div>
+    <div class="card-body">
+        {% if patient.medical_history %}
+            <p>{{ patient.medical_history }}</p>
+        {% else %}
+            <p class="text-muted mb-0">No medical history recorded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Medical Records / Documents -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Medical Records / Documents</h5>
+    </div>
+    <div class="card-body">
+        {% if documents %}
+            <ul class="list-group">
+                {% for doc in documents %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{{ doc.document.url }}" target="_blank">{{ doc.original_filename|default:doc.document.name }}</a>
+                        {% if doc.description %} - {{ doc.description }}{% endif %}
+                    </div>
+                    <small class="text-muted">Uploaded: {{ doc.uploaded_at|date:"M d, Y" }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted mb-0">No documents uploaded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Patient ID / Pictures -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Patient ID / Pictures</h5>
+    </div>
+    <div class="card-body">
+        {% if pictures %}
+            <div class="row">
+                {% for pic in pictures %}
+                <div class="col-md-3 col-sm-4 col-6 mb-3">
+                    <div class="card">
+                        <a href="{{ pic.picture.url }}" target="_blank">
+                            <img src="{{ pic.picture.url }}" alt="{{ pic.caption|default:'Patient Picture' }}" class="card-img-top">
+                        </a>
+                        {% if pic.caption %}
+                        <div class="card-body p-2">
+                            <small>{{ pic.caption }}</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">No pictures/ID uploaded.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
