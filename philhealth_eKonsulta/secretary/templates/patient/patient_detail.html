@@ -1,102 +1,107 @@
-{% extends 'base.html' %}
+{% extends 'base_dashboard.html' %}
+{% load static %}
 
 {% block title %}Patient Details{% endblock %}
 
 {% block content %}
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-      crossorigin="anonymous">
-
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center py-3 border-bottom mb-4">
+    <div>
         <h2>Patient Details</h2>
-        <div>
-            <a href="{% url 'patient_update' patient.id %}" class="btn btn-primary">Edit</a>
-            <a href="{% url 'patient_list' %}" class="btn btn-secondary">Back to List</a>
-        </div>
+        <p class="text-muted mb-0">{{ patient.first_name }} {{ patient.last_name }}</p>
     </div>
+    <div>
+        <a href="{% url 'patient_update' patient.id %}" class="btn btn-primary">Edit</a>
+        <a href="{% url 'patient_list' %}" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>
 
-    <!-- Patient Info Card -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">Basic Information</h4>
-            <div class="row mt-3">
-                <div class="col-md-6">
-                    <p><strong>ID:</strong> {{ patient.id }}</p>
-                    <p><strong>First Name:</strong> {{ patient.first_name }}</p>
-                    <p><strong>Last Name:</strong> {{ patient.last_name }}</p>
-                    <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
-                    <p><strong>Gender:</strong> {{ patient.gender }}</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Contact Number:</strong> {{ patient.contact_number }}</p>
-                    <p><strong>Email:</strong> {{ patient.email|default:"N/A" }}</p>
-                    <p><strong>Address:</strong> {{ patient.address|default:"N/A" }}</p>
-                    <p><strong>Medical History:</strong> {{ patient.medical_history|default:"N/A" }}</p>
-                    <p><strong>Created At:</strong> {{ patient.created_at }}</p>
-                </div>
+<!-- Patient Info Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Basic Information</h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>ID:</strong> {{ patient.id }}</p>
+                <p><strong>First Name:</strong> {{ patient.first_name }}</p>
+                <p><strong>Last Name:</strong> {{ patient.last_name }}</p>
+                <p><strong>Birth Date:</strong> {{ patient.birth_date }}</p>
+                <p class="mb-md-0"><strong>Gender:</strong> {{ patient.gender }}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Contact Number:</strong> {{ patient.contact_number }}</p>
+                <p><strong>Email:</strong> {{ patient.email|default:"N/A" }}</p>
+                <p><strong>Address:</strong> {{ patient.address|default:"N/A" }}</p>
+                <p><strong>Medical History:</strong> {{ patient.medical_history|default:"N/A" }}</p>
+                <p class="mb-0"><strong>Created At:</strong> {{ patient.created_at }}</p>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Documents Card -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">Medical Record Documents</h4>
-            {% if patient.documents.all %}
-                <div class="list-group mt-3">
-                    {% for doc in patient.documents.all %}
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <a href="{{ doc.document.url }}" target="_blank">
-                                    {{ doc.original_filename|default:doc.document.name }}
-                                </a>
-                                <br>
-                                <small class="text-muted">{{ doc.description|default:"N/A" }} | {{ doc.uploaded_at }}</small>
-                            </div>
-                            <form method="post" action="{% url 'delete_patient_document' doc.pk %}">
+<!-- Documents Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Medical Record Documents</h5>
+    </div>
+    <div class="card-body">
+        {% if patient.documents.all %}
+            <ul class="list-group list-group-flush">
+                {% for doc in patient.documents.all %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <a href="{{ doc.document.url }}" target="_blank">
+                            {{ doc.original_filename|default:doc.document.name }}
+                        </a>
+                        <br>
+                        <small class="text-muted">{{ doc.description|default:"No description" }} | {{ doc.uploaded_at }}</small>
+                    </div>
+                    <form method="post" action="{% url 'delete_patient_document' doc.pk %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted mb-0">No documents uploaded.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Pictures Card -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">Patient Pictures</h5>
+    </div>
+    <div class="card-body">
+        {% if patient.pictures.all %}
+            <div class="row">
+                {% for pic in patient.pictures.all %}
+                <div class="col-md-3 col-sm-4 col-6 mb-3">
+                    <div class="card h-100">
+                        <a href="{{ pic.picture.url }}" target="_blank">
+                            <img src="{{ pic.picture.url }}" class="card-img-top" alt="{{ pic.caption|default:'Patient picture' }}">
+                        </a>
+                        <div class="card-body p-2">
+                            <p class="small mb-1"><strong>Caption:</strong> {{ pic.caption|default:"N/A" }}</p>
+                            <p class="small text-muted mb-0">Uploaded: {{ pic.uploaded_at }}</p>
+                        </div>
+                        <div class="card-footer p-2">
+                            <form method="post" action="{% url 'delete_patient_picture' pic.pk %}">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                <button type="submit" class="btn btn-sm btn-danger w-100">Delete</button>
                             </form>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
-            {% else %}
-                <p class="text-muted mt-3">No documents uploaded.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- Pictures Card -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h4 class="card-title">Patient Pictures</h4>
-            {% if patient.pictures.all %}
-                <div class="row mt-3">
-                    {% for pic in patient.pictures.all %}
-                        <div class="col-md-4 mb-3">
-                            <div class="card h-100">
-                                <img src="{{ pic.picture.url }}" class="card-img-top"
-                                     alt="{{ pic.caption|default:'Patient picture' }}">
-                                <div class="card-body">
-                                    <p><strong>Caption:</strong> {{ pic.caption|default:"N/A" }}</p>
-                                    <p><small class="text-muted">Uploaded: {{ pic.uploaded_at }}</small></p>
-                                </div>
-                                <div class="card-footer text-center">
-                                    <form method="post" action="{% url 'delete_patient_picture' pic.pk %}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="text-muted mt-3">No pictures uploaded.</p>
-            {% endif %}
-        </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted mb-0">No pictures uploaded.</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
