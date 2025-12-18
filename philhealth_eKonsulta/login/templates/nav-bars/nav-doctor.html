@@ -17,6 +17,13 @@
                 Appointments
             </a>
         </li>
+        <!-- (12/18/2025 - Gocotano) - My Patients navigation item -->
+        <li class="nav-item">
+            <a class="nav-link text-dark {% if request.resolver_match.url_name == 'my_patients' or request.resolver_match.url_name == 'my_patient_detail' %}bg-primary text-white rounded{% endif %}"
+               href="{% url 'my_patients' %}">
+                Patients
+            </a>
+        </li>
     </ul>
 
     <div class="position-absolute bottom-0 w-100 p-3 border-top">

@@ -14,6 +14,14 @@ User = get_user_model()
 
 
 # -------------------------
+#       LANDING PAGE
+# -------------------------
+
+def landing_page(request):
+    return render(request, "landing_page.html")
+
+
+# -------------------------
 #       LOGIN VIEWS
 # -------------------------
 

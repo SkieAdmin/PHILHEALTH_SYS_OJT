@@ -1,10 +1,268 @@
 {% extends 'base.html'%}
-{% block content %}
-<h2>Consultation for {{ appointment.patient }}</h2>
+{% load static %}
 
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Save Consultation</button>
-</form>
+{% block title %}Consultation - {{ appointment.patient }}{% endblock %}
+
+<!-- (12/18/2025 - Gocotano) - Select2 CSS for searchable dropdown -->
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+{% endblock %}
+
+{% block content %}
+<!-- (12/18/2025 - Gocotano) - Updated consultation form with dynamic prescription UI -->
+
+<div class="container py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Consultation</h2>
+            <p class="text-muted mb-0">Patient: {{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</p>
+        </div>
+        <a href="{% url 'doctor_appt_list' %}" class="btn btn-outline-secondary">
+            Back to Appointments
+        </a>
+    </div>
+
+    <form method="post" id="consultationForm">
+        {% csrf_token %}
+
+        <div class="row">
+            <!-- Left Column - Consultation Details -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Consultation Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Diagnosis Field -->
+                        <div class="mb-3">
+                            <label for="id_diagnosis" class="form-label fw-medium">Diagnosis <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="id_diagnosis" name="diagnosis" rows="3" required placeholder="Enter diagnosis..."></textarea>
+                        </div>
+
+                        <!-- (12/18/2025 - Gocotano) - Reason Notes Field -->
+                        <div class="mb-3">
+                            <label for="id_reason_notes" class="form-label fw-medium">Reason Notes</label>
+                            <textarea class="form-control" id="id_reason_notes" name="reason_notes" rows="3" placeholder="Enter reason notes..."></textarea>
+                        </div>
+
+                        <!-- Additional Notes Field -->
+                        <div class="mb-3">
+                            <label for="id_notes" class="form-label fw-medium">Additional Notes</label>
+                            <textarea class="form-control" id="id_notes" name="notes" rows="3" placeholder="Additional notes..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Prescriptions -->
+            <div class="col-lg-6 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Prescriptions</h5>
+                        <!-- (12/18/2025 - Gocotano) - Add Prescription Button -->
+                        <button type="button" class="btn btn-light btn-sm" onclick="addPrescriptionRow()">
+                            + Add Medicine
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- (12/18/2025 - Gocotano) - Prescription List Container -->
+                        <div id="prescriptionList">
+                            <!-- Prescription rows will be added here dynamically -->
+                        </div>
+
+                        <!-- Empty State Message -->
+                        <div id="emptyPrescriptionMsg" class="text-center py-4 text-muted">
+                            <p class="mb-2">No prescriptions added yet.</p>
+                            <button type="button" class="btn btn-outline-success btn-sm" onclick="addPrescriptionRow()">
+                                + Add First Medicine
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden field to store prescription data as JSON -->
+        <!-- (12/18/2025 - Gocotano) - Stores all prescription data for form submission -->
+        <input type="hidden" name="prescriptions_data" id="prescriptionsData" value="[]">
+
+        <!-- Submit Button -->
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-lg" onclick="prepareSubmit()">
+                Save Consultation
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- (12/18/2025 - Gocotano) - Prescription Row Template (hidden) -->
+<template id="prescriptionRowTemplate">
+    <div class="prescription-row card mb-3" data-row-id="">
+        <div class="card-body">
+            <div class="row g-2">
+                <!-- Medicine Select -->
+                <div class="col-12">
+                    <label class="form-label small fw-medium">Medicine</label>
+                    <select class="form-select medicine-select" onchange="updateMedicineInfo(this)">
+                        <option value="">Select Medicine...</option>
+                        {% for medicine in medicines %}
+                        <option value="{{ medicine.id }}" data-price="{{ medicine.price }}" data-name="{{ medicine.name }}">
+                            {{ medicine.name }} - ₱{{ medicine.price }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Quantity -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium">Quantity</label>
+                    <input type="number" class="form-control quantity-input" min="1" value="1" onchange="updatePrescriptionData()">
+                </div>
+
+                <!-- Price Display -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium">Price</label>
+                    <input type="text" class="form-control price-display" readonly value="₱0.00">
+                </div>
+
+                <!-- Total Display -->
+                <div class="col-md-4">
+                    <label class="form-label small fw-medium">Total</label>
+                    <input type="text" class="form-control total-display" readonly value="₱0.00">
+                </div>
+
+                <!-- Doctor Prescription Instructions -->
+                <div class="col-12">
+                    <label class="form-label small fw-medium">Doctor Prescription</label>
+                    <textarea class="form-control doctor-prescription" rows="2" placeholder="Dosage instructions (e.g., Take 1 tablet 3x a day after meals)..." onchange="updatePrescriptionData()"></textarea>
+                </div>
+
+                <!-- Remove Button -->
+                <div class="col-12 text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="removePrescriptionRow(this)">
+                        X Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- (12/18/2025 - Gocotano) - jQuery and Select2 JS for searchable dropdown -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- (12/18/2025 - Gocotano) - JavaScript for dynamic prescription management -->
+<script>
+    let prescriptionCounter = 0;
+
+    // (12/18/2025 - Gocotano) - Initialize Select2 on a medicine select element
+    function initializeSelect2(selectElement) {
+        $(selectElement).select2({
+            theme: 'bootstrap-5',
+            placeholder: 'Type to search medicine...',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // (12/18/2025 - Gocotano) - Handle Select2 change event
+        $(selectElement).on('select2:select', function(e) {
+            updateMedicineInfo(this);
+        });
+        $(selectElement).on('select2:clear', function(e) {
+            updateMedicineInfo(this);
+        });
+    }
+
+    // (12/18/2025 - Gocotano) - Add a new prescription row
+    function addPrescriptionRow() {
+        const template = document.getElementById('prescriptionRowTemplate');
+        const clone = template.content.cloneNode(true);
+        const row = clone.querySelector('.prescription-row');
+
+        prescriptionCounter++;
+        row.setAttribute('data-row-id', prescriptionCounter);
+
+        // (12/18/2025 - Gocotano) - Give unique ID to the select for Select2
+        const select = row.querySelector('.medicine-select');
+        select.id = 'medicine-select-' + prescriptionCounter;
+
+        document.getElementById('prescriptionList').appendChild(row);
+        document.getElementById('emptyPrescriptionMsg').style.display = 'none';
+
+        // (12/18/2025 - Gocotano) - Initialize Select2 on the new select element
+        initializeSelect2(select);
+
+        updatePrescriptionData();
+    }
+
+    // (12/18/2025 - Gocotano) - Remove a prescription row
+    function removePrescriptionRow(button) {
+        const row = button.closest('.prescription-row');
+
+        // (12/18/2025 - Gocotano) - Destroy Select2 before removing
+        const select = row.querySelector('.medicine-select');
+        if ($(select).hasClass('select2-hidden-accessible')) {
+            $(select).select2('destroy');
+        }
+
+        row.remove();
+
+        // Show empty message if no prescriptions left
+        const prescriptionList = document.getElementById('prescriptionList');
+        if (prescriptionList.children.length === 0) {
+            document.getElementById('emptyPrescriptionMsg').style.display = 'block';
+        }
+
+        updatePrescriptionData();
+    }
+
+    // (12/18/2025 - Gocotano) - Update medicine info when selection changes
+    function updateMedicineInfo(selectElement) {
+        const row = selectElement.closest('.prescription-row');
+        const selectedOption = selectElement.options[selectElement.selectedIndex];
+        const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+        const quantity = parseInt(row.querySelector('.quantity-input').value) || 1;
+
+        row.querySelector('.price-display').value = '₱' + price.toFixed(2);
+        row.querySelector('.total-display').value = '₱' + (price * quantity).toFixed(2);
+
+        updatePrescriptionData();
+    }
+
+    // (12/18/2025 - Gocotano) - Update prescription data JSON
+    function updatePrescriptionData() {
+        const prescriptions = [];
+        const rows = document.querySelectorAll('.prescription-row');
+
+        rows.forEach(row => {
+            const medicineSelect = row.querySelector('.medicine-select');
+            const quantity = row.querySelector('.quantity-input').value;
+            const doctorPrescription = row.querySelector('.doctor-prescription').value;
+
+            // Update total when quantity changes
+            const selectedOption = medicineSelect.options[medicineSelect.selectedIndex];
+            const price = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+            const qty = parseInt(quantity) || 1;
+            row.querySelector('.total-display').value = '₱' + (price * qty).toFixed(2);
+
+            if (medicineSelect.value) {
+                prescriptions.push({
+                    medicine_id: medicineSelect.value,
+                    quantity: quantity,
+                    doctor_prescription: doctorPrescription
+                });
+            }
+        });
+
+        document.getElementById('prescriptionsData').value = JSON.stringify(prescriptions);
+    }
+
+    // (12/18/2025 - Gocotano) - Prepare data before form submission
+    function prepareSubmit() {
+        updatePrescriptionData();
+    }
+</script>
 {% endblock content%}

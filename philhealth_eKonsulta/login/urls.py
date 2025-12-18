@@ -4,6 +4,8 @@ from .import views
 
 urlpatterns = [
     # path('', views.index, name="index"),
+    #Landing page bruhh
+    path('', views.landing_page, name="landing_page"),
 
     path('login/', views.login_view, name="login"),
     path(' ', views.user_logout, name="logout"),
