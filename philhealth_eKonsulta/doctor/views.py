@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from secretary.models import Appointment, DoctorProfile, Patient, PatientDocument, PatientPicture  #[12-17-2025 - Gocotano] - Added PatientDocument, PatientPicture imports
 from .models import models
+from .forms import ConsultationForm
 from django.db.models import Q  #[12-17-2025 - Gocotano] - Added Q for search filtering
 
 @login_required
@@ -60,3 +61,53 @@ def patient_appt_detail(request, appointment_id):
         'pictures': pictures
     })
 
+# @login_required
+# def add_consultation(request, appointment_id):
+#     appointment = get_object_or_404(Appointment, id=appointment_id, status="APPROVED")
+
+#     if request.method == "POST":
+#         form = ConsultationForm(request.POST)
+#         if form.is_valid():
+#             consultation = form.save(commit=False)
+#             consultation.appointment = appointment
+#             consultation.doctor = request.user
+#             consultation.save()
+#             return redirect('doctor_appt_list')
+#     else:
+#         form = ConsultationForm()
+
+#     return render(request, "consultation/add_consultation.html", {"form": form, "appointment": appointment})
+
+
+@login_required
+def add_consultation(request, appointment_id):
+    appointment = get_object_or_404(
+        Appointment,
+        id=appointment_id,
+        status="APPROVE"
+    )
+
+    # Prevent duplicate consultation
+    if hasattr(appointment, "consultation"):
+        return redirect("doctor_appt_list")
+
+    if request.method == "POST":
+        form = ConsultationForm(request.POST)
+        if form.is_valid():
+            consultation = form.save(commit=False)
+            consultation.appointment = appointment
+            consultation.doctor = request.user
+            consultation.save()
+
+            appointment.status = "COMPLETED"
+            appointment.save()
+
+            return redirect("doctor_appt_list")
+    else:
+        form = ConsultationForm()
+
+    return render(
+        request,
+        "consultation/add_consultation.html",
+        {"form": form, "appointment": appointment}
+    )
