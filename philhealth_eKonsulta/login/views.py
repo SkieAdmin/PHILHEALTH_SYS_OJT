@@ -3,9 +3,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 from django.contrib import messages
 from django.db import IntegrityError
-from django.db.models import Q
+from django.db.models import Q, Count
+from secretary.models import Appointment
 
 from .models import DoctorProfile, SecretaryProfile, FinanceProfile
 
@@ -506,8 +508,25 @@ def admin_logout(request):
 def doctor_dashboard(request):
     if request.user.role != "DOCTOR":
         return render(request, "login/error.html", {"message": "Access denied."})
+    
     doctor_profile = get_object_or_404(DoctorProfile, user = request.user)
-    return render(request, "landing_pages/doctor.html",{"doctor": doctor_profile})
+
+    today = now().date()
+    today_appointments = doctor_profile.appointments.filter(date__date = today, status = "PENDING").count()
+    summary_counts = doctor_profile.appointments.aggregate(
+        total_pending = Count("id", filter=Q(status = "PENDING")),
+        total_completed = Count("id", filter=Q(status = "COMPLETED"))
+    )
+    context = {
+        "doctor": doctor_profile,
+        "today_appointments": today_appointments,
+        "summary_counts" : summary_counts,
+    }
+
+    return render(request, "landing_pages/doctor.html", context)
+
+    
+
 
 def secretary_dashboard(request):
     if request.user.role != "SECRETARY":

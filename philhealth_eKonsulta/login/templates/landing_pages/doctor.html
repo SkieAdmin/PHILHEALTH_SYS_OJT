@@ -29,7 +29,7 @@
         <div class="card">
             <div class="card-body text-center">
                 <h5 class="card-title text-muted">Pending</h5>
-                <h2 class="display-4">{{ pending_appointments|default:"0" }}</h2>
+                <h2 class="display-4">{{ summary_counts.total_pending|default:"0" }}</h2>
             </div>
         </div>
     </div>
@@ -37,7 +37,7 @@
         <div class="card">
             <div class="card-body text-center">
                 <h5 class="card-title text-muted">Completed</h5>
-                <h2 class="display-4">{{ completed_appointments|default:"0" }}</h2>
+                <h2 class="display-4">{{ summary_counts.total_completed|default:"0" }}</h2>
             </div>
         </div>
     </div>
