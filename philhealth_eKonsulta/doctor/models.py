@@ -19,13 +19,26 @@ class Medicine(models.Model):
 
 
 class Consultation(models.Model):
+    STATUS_CHOICES = [
+        ("ONGOING", "Ongoing"),
+        ("COMPLETED", "Completed"),
+    ]
+
     appointment = models.OneToOneField(Appointment, on_delete = models.CASCADE, related_name="consultation")
     diagnosis  = models.TextField()
     # (Old Code) - prescription = models.TextField(blank=True, null=True)
     reason_notes = models.TextField(blank=True, null=True)  # (12/18/2025 - Gocotano) - Added reason notes field
     notes = models.TextField(blank=True, null=True)
     doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="consultation")
-    date = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="ONGOING")
+    date = models.DateTimeField(auto_now_add=True)  
+
+    def get_total_amount(self):
+        return sum(
+            prescription.get_total_price()
+            for prescription in self.prescriptions.all()
+        )
+
 
     def __str__(self):
         return f"Consultation for {self.appointment.patient} by {self.doctor}"

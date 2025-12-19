@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Finance Dashboard</h2>
+
+<table>
+  <tr>
+    <th>Patient</th>
+    <th>Doctor</th>
+    <th>Diagnosis</th>
+    <th>Payment Status</th>
+    <th>Actions</th>
+  </tr>
+
+  {% for consultation in consultations %}
+  <tr>
+    <td>{{ consultation.appointment.patient.name }}</td>
+    <td>{{ consultation.doctor.username }}</td>
+    <td>{{ consultation.diagnosis }}</td>
+    <td>
+      {% if consultation.payment %}
+        <span class="badge">{{ consultation.payment.status }}</span>
+      {% else %}
+        <span class="badge">UNPAID</span>
+      {% endif %}
+    </td>
+    <td>
+      <a href="{% url 'update_payment_status' consultation.id 'PAID' %}">Mark Paid</a>
+      <a href="{% url 'update_payment_status' consultation.id 'UNPAID' %}">Mark Unpaid</a>
+      <a href="{% url 'update_payment_status' consultation.id 'PHILHEALTH' %}">PhilHealth</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+
+    <a href="{% url 'finance_dashboard' %}">back</a>
+{% endblock %}

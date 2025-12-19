@@ -138,6 +138,7 @@ def add_consultation(request, appointment_id):
             consultation = form.save(commit=False)
             consultation.appointment = appointment
             consultation.doctor = request.user
+            appointment.status = "COMPLETED"
             consultation.save()
 
             # (12/18/2025 - Gocotano) - Process prescription data from form

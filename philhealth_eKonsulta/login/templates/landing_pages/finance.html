@@ -2,5 +2,12 @@
 {% block title %}Doctor Dashboard{% endblock %}
 {% block content %}
 <h2>Welcome, Finance!</h2>
-<a href="{% url 'logout' %}"></a>
-{% endblock %}
+
+
+
+<a href="{% url 'payment_dashboard' %}"><button type="button">Payments</button></a>
+
+
+
+<a href="{% url 'logout' %}"><button type="button">Sign Out</button></a>
+{% endblock %}  
