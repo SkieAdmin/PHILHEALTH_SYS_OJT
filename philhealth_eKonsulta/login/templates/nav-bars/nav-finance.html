@@ -1,0 +1,29 @@
+<!-- (12-19-2025) Gocotano - Sidebar for Finance -->
+<div class="col-md-3 col-lg-2 d-md-block bg-light vh-100 position-fixed p-0 border-end">
+    <div class="text-center py-4 border-bottom">
+        <div class="fw-bold fs-4">PHILHEALTH</div>
+    </div>
+
+    <ul class="nav flex-column mt-3 px-2">
+        <!-- (12-19-2025) Gocotano - Dashboard navigation item -->
+        <li class="nav-item">
+            <a class="nav-link text-dark {% if request.resolver_match.url_name == 'finance_dashboard' %}bg-primary text-white rounded{% endif %}"
+               href="{% url 'finance_dashboard' %}">
+                Dashboard
+            </a>
+        </li>
+        <!-- (12-19-2025) Gocotano - Billing navigation item -->
+        <li class="nav-item">
+            <a class="nav-link text-dark {% if request.resolver_match.url_name == 'billing_detail' %}bg-primary text-white rounded{% endif %}"
+               href="{% url 'finance_dashboard' %}">
+                Billing
+            </a>
+        </li>
+    </ul>
+
+    <div class="position-absolute bottom-0 w-100 p-3 border-top">
+        <a href="{% url 'logout' %}" class="d-block text-decoration-none text-danger">
+            Sign Out
+        </a>
+    </div>
+</div>
