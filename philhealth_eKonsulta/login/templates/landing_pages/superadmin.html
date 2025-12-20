@@ -4,14 +4,13 @@
 {% block title %}SuperAdmin Dashboard{% endblock %}
 
 {% block content %}
+<!-- (12-20-2025) Gocotano - Dashboard is now blank, Create New User moved to Manage Users > Create New User -->
+
 <!-- Header -->
 <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
     <div>
         <h2>Dashboard</h2>
-        <p class="text-muted mb-0">Welcome</p>
-    </div>
-    <div class="d-flex align-items-center gap-3">
-        <input type="text" class="form-control" placeholder="Search...">
+        <p class="text-muted mb-0">Welcome, SuperAdmin</p>
     </div>
 </div>
 
@@ -27,137 +26,4 @@
 </div>
 {% endif %}
 
-<!-- Create New User Section -->
-<div class="mt-4">
-    <h3>Create New User</h3>
-    <p class="text-muted">Create accounts for Doctor, Secretary, or Finance staff</p>
-
-    <form method="post" action="{% url 'superadmain_dashboard' %}">
-        {% csrf_token %}
-        
-        <!-- User Role Selection -->
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">User Role</label>
-                <select class="form-select" id="userRole" name="role" required onchange="updateForm()">
-                    <option value="">Select role...</option>
-                    <option value="DOCTOR">Doctor</option>
-                    <option value="SECRETARY">Secretary</option>
-                    <option value="FINANCE">Finance</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- Common Fields -->
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">First Name</label>
-                <input type="text" class="form-control" name="first_name" placeholder="Enter first name" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Last Name</label>
-                <input type="text" class="form-control" name="last_name" placeholder="Enter last name" required>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Username</label>
-                <input type="text" class="form-control" name="username" placeholder="Enter username" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Password</label>
-                <input type="password" class="form-control" name="password" placeholder="Enter password" required>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Employee ID</label>
-                <input type="text" class="form-control" name="employee_id" placeholder="Enter employee ID" required>
-            </div>
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Phone</label>
-                <input type="text" class="form-control" name="phone" placeholder="Enter phone number" required>
-            </div>
-        </div>
-
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label class="form-label">Email</label>
-                <input type="email" class="form-control" name="email" placeholder="Enter email" required>
-            </div>
-        </div>
-
-        <!-- Doctor Specific Fields -->
-        <div id="doctorFields" style="display: none;">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Specialization</label>
-                    <input type="text" class="form-control" name="specialization" placeholder="Enter specialization">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">License Number</label>
-                    <input type="text" class="form-control" name="license_number" placeholder="Enter license number">
-                </div>
-            </div>
-        </div>
-
-        <!-- Secretary Specific Fields -->
-        <div id="secretaryFields" style="display: none;">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Department</label>
-                    <input type="text" class="form-control" name="department" placeholder="Enter department">
-                </div>
-            </div>
-        </div>
-
-        <!-- Finance Specific Fields -->
-        <div id="financeFields" style="display: none;">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Position</label>
-                    <input type="text" class="form-control" name="position" placeholder="Enter position">
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Create User</button>
-    </form>
-</div>
-
-<script>
-function updateForm() {
-    const role = document.getElementById('userRole').value;
-    
-    // Hide all role-specific fields
-    document.getElementById('doctorFields').style.display = 'none';
-    document.getElementById('secretaryFields').style.display = 'none';
-    document.getElementById('financeFields').style.display = 'none';
-    
-    // Remove required attribute from all role-specific fields
-    document.querySelectorAll('#doctorFields input, #secretaryFields input, #financeFields input').forEach(input => {
-        input.removeAttribute('required');
-    });
-    
-    // Show and set required for selected role fields
-    if (role === 'DOCTOR') {
-        document.getElementById('doctorFields').style.display = 'block';
-        document.querySelectorAll('#doctorFields input').forEach(input => {
-            input.setAttribute('required', 'required');
-        });
-    } else if (role === 'SECRETARY') {
-        document.getElementById('secretaryFields').style.display = 'block';
-        document.querySelectorAll('#secretaryFields input').forEach(input => {
-            input.setAttribute('required', 'required');
-        });
-    } else if (role === 'FINANCE') {
-        document.getElementById('financeFields').style.display = 'block';
-        document.querySelectorAll('#financeFields input').forEach(input => {
-            input.setAttribute('required', 'required');
-        });
-    }
-}
-</script>
 {% endblock %}

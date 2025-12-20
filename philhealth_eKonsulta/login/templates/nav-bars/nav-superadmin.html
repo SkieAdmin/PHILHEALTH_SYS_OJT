@@ -11,8 +11,9 @@
                 Dashboard
             </a>
         </li>
+        <!-- (12-20-2025) Gocotano - Keep Manage Users active for list_users, create_user, view_user, update_user -->
         <li class="nav-item">
-            <a class="nav-link text-dark {% if request.resolver_match.url_name == 'list_users' %}bg-primary text-white rounded{% endif %}"
+            <a class="nav-link text-dark {% if request.resolver_match.url_name == 'list_users' or request.resolver_match.url_name == 'create_user' or request.resolver_match.url_name == 'view_user' or request.resolver_match.url_name == 'update_user' %}bg-primary text-white rounded{% endif %}"
                href="{% url 'list_users' %}">
                 Manage Users
             </a>

@@ -18,7 +18,9 @@
         <h2>Manage Users</h2>
         <p class="text-muted mb-0">View and manage all created accounts</p>
     </div>
-    <div>
+    <div class="d-flex gap-2">
+        <!-- (12-20-2025) Gocotano - Create New User button -->
+        <a href="{% url 'create_user' %}" class="btn btn-success">Create New User</a>
         <form method="GET" action="" class="d-flex gap-2 align-items-center">
             <input type="text" class="form-control" id="search_query" name="search_query"
                    placeholder="Search by name..." value="{{ request.GET.search_query|default_if_none:'' }}">
