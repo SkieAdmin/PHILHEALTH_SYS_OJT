@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-t6l*-(@i&a9c-7@sp_4j*(e%^+6757&w&_z7wcx6x97re&()$x
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 # Set to ( Docker / Live / Sol )
-DATABASE_MODE = "Docker"
+DATABASE_MODE = "sol"
 
 ALLOWED_HOSTS = []
 

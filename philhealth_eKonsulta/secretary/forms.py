@@ -24,11 +24,6 @@ class SinglePictureForm(forms.Form):
     caption = forms.CharField(max_length=255, required=False)
 
 
-# class AppointmentForm(forms.ModelForm):
-#     class Meta:
-#         model = Appointment
-#         fields = '__all__'
-
 class AppointmentForm(forms.ModelForm):
     class Meta:
         model = Appointment
