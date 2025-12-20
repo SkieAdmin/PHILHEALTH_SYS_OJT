@@ -34,15 +34,33 @@ from .models import Billing, BillingItem, Transaction
 #     return redirect("payment_dashboard")
 
 
-# (12-19-2025) Gocotano - Finance dashboard view showing all consultations for billing
+# (12-19-2025) Gocotano - Finance dashboard view showing summary cards
 @login_required
 def finance_dashboard(request):
+    # (12-20-2025) Gocotano - Get counts for summary cards
+    total_billings = Billing.objects.count()
+    pending_count = Billing.objects.filter(status='PENDING').count()
+    partial_count = Billing.objects.filter(status='PARTIAL').count()
+    paid_count = Billing.objects.filter(status='PAID').count()
+    philhealth_count = Billing.objects.filter(status='PHILHEALTH').count()
+
+    return render(request, 'finance/finance_dashboard.html', {
+        'total_billings': total_billings,
+        'pending_count': pending_count,
+        'partial_count': partial_count,
+        'paid_count': paid_count,
+        'philhealth_count': philhealth_count
+    })
+
+
+# (12-20-2025) Gocotano - Billing list view showing all billing records with filters
+@login_required
+def billing_list(request):
     # (12-19-2025) Gocotano - Get all consultations where appointment is COMPLETED (not consultation status)
-    # (Old Code) - consultations = Consultation.objects.filter(status="COMPLETED")
     consultations = Consultation.objects.filter(appointment__status="COMPLETED").select_related(
         'appointment__patient',
         'appointment__doctor',
-        'appointment__doctor__user',  # (12-19-2025) Gocotano - Include doctor user for name display
+        'appointment__doctor__user',
         'doctor'
     ).order_by('-date')
 
@@ -57,7 +75,6 @@ def finance_dashboard(request):
     # (12-19-2025) Gocotano - Status filter
     status_filter = request.GET.get('status', '')
     if status_filter:
-        # Filter by billing status
         if status_filter == 'NO_BILLING':
             consultations = consultations.filter(billing__isnull=True)
         else:
@@ -67,12 +84,10 @@ def finance_dashboard(request):
     billing_list = []
     for consultation in consultations:
         if not hasattr(consultation, 'billing'):
-            # Create billing if doesn't exist
             billing = Billing.objects.create(
                 consultation=consultation,
                 total_amount=consultation.get_total_amount()
             )
-            # Create billing items from prescriptions
             for prescription in consultation.prescriptions.all():
                 BillingItem.objects.create(
                     billing=billing,
@@ -85,20 +100,19 @@ def finance_dashboard(request):
         else:
             billing = consultation.billing
 
-        # (12-19-2025) Gocotano - Get the assigned doctor from appointment (DoctorProfile)
         assigned_doctor = consultation.appointment.doctor
         billing_list.append({
             'consultation': consultation,
             'billing': billing,
             'patient': consultation.appointment.patient,
-            'doctor': consultation.doctor,  # The user who created consultation
-            'assigned_doctor': assigned_doctor,  # (12-19-2025) Gocotano - The DoctorProfile assigned to appointment
+            'doctor': consultation.doctor,
+            'assigned_doctor': assigned_doctor,
             'amount': billing.total_amount,
             'balance': billing.get_balance(),
             'status': billing.status
         })
 
-    return render(request, 'finance/finance_dashboard.html', {
+    return render(request, 'finance/billing_list.html', {
         'billing_list': billing_list,
         'search_query': search_query,
         'status_filter': status_filter

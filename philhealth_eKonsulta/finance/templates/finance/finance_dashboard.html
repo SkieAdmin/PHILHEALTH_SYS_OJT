@@ -4,81 +4,77 @@
 {% block title %}Finance Dashboard{% endblock %}
 
 {% block content %}
-<!-- (12-19-2025) Gocotano - Finance Dashboard for billing management -->
+<!-- (12-20-2025) Gocotano - Finance Dashboard with summary cards -->
 
 <!-- Header -->
-<div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+<div class="d-flex justify-content-between align-items-center py-3 border-bottom mb-4">
     <div>
-        <h2>Finance Dashboard</h2>
-        <p class="text-muted mb-0">Manage patient billing and payments</p>
-    </div>
-    <div>
-        <!-- (12-19-2025) Gocotano - Search and filter form -->
-        <form method="GET" action="" class="d-flex gap-2 align-items-center">
-            <input type="text" class="form-control" name="search" placeholder="Search patient name..." value="{{ search_query|default:'' }}">
-            <select class="form-select" name="status">
-                <option value="">All Status</option>
-                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
-                <option value="PARTIAL" {% if status_filter == 'PARTIAL' %}selected{% endif %}>Partially Paid</option>
-                <option value="PAID" {% if status_filter == 'PAID' %}selected{% endif %}>Paid</option>
-                <option value="PHILHEALTH" {% if status_filter == 'PHILHEALTH' %}selected{% endif %}>PhilHealth-Covered</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Filter</button>
-            <a href="{% url 'finance_dashboard' %}" class="btn btn-secondary">Clear</a>
-        </form>
+        <h2 class="mb-1">Dashboard</h2>
+        <p class="text-muted mb-0">Finance Overview</p>
     </div>
 </div>
 
-<!-- (12-19-2025) Gocotano - Billing Table -->
-<div class="mt-4">
-    <table class="table table-striped table-bordered table-hover">
-        <thead>
-            <tr>
-                <th>Patient</th>
-                <th>Assigned Doctor</th>
-                <th>Amount</th>
-                <th>Balance</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in billing_list %}
-            <tr>
-                <td>
-                    <!-- (12-19-2025) Gocotano - Link to billing detail page -->
-                    <a href="{% url 'billing_detail' item.billing.id %}" class="text-decoration-none">
-                        {{ item.patient.first_name }} {{ item.patient.last_name }}
-                    </a>
-                </td>
-                <!-- (12-19-2025) Gocotano - Show assigned doctor from appointment (DoctorProfile has its own name fields) -->
-                <td>Dr. {{ item.assigned_doctor.first_name }} {{ item.assigned_doctor.last_name }}</td>
-                <td>{{ item.amount }}</td>
-                <td>{{ item.balance }}</td>
-                <td>
-                    <!-- (12-19-2025) Gocotano - Status badges -->
-                    {% if item.status == 'PENDING' %}
-                        <span class="badge bg-warning text-dark">Pending</span>
-                    {% elif item.status == 'PARTIAL' %}
-                        <span class="badge bg-info">Partially Paid</span>
-                    {% elif item.status == 'PAID' %}
-                        <span class="badge bg-success">Paid</span>
-                    {% elif item.status == 'PHILHEALTH' %}
-                        <span class="badge bg-primary">PhilHealth-Covered</span>
-                    {% else %}
-                        <span class="badge bg-secondary">{{ item.status }}</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <a href="{% url 'billing_detail' item.billing.id %}" class="btn btn-sm btn-primary">View Details</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center">No billing records found.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- (12-20-2025) Gocotano - Stats Cards -->
+<div class="row">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="card-title text-muted">Total Billings</h5>
+                <h2 class="display-4">{{ total_billings }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+            <div class="card-body text-center">
+                <h5 class="card-title text-warning">Pending</h5>
+                <h2 class="display-4 text-warning">{{ pending_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card border-0 shadow-sm bg-info bg-opacity-10">
+            <div class="card-body text-center">
+                <h5 class="card-title text-info">Partially Paid</h5>
+                <h2 class="display-4 text-info">{{ partial_count }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <h5 class="card-title text-success">Paid</h5>
+                <h2 class="display-4 text-success">{{ paid_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- (12-20-2025) Gocotano - PhilHealth Card -->
+<div class="row mt-2">
+    <div class="col-md-6 col-lg-3 mb-3">
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10">
+            <div class="card-body text-center">
+                <h5 class="card-title text-primary">PhilHealth Covered</h5>
+                <h2 class="display-4 text-primary">{{ philhealth_count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- (12-20-2025) Gocotano - Quick Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <a href="{% url 'billing_list' %}" class="btn btn-primary me-2">
+                    <i class="bi bi-list-ul me-1"></i>View All Billings
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

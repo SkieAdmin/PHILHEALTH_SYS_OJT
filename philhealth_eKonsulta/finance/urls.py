@@ -10,6 +10,7 @@ from . import views
 # (12-19-2025) Gocotano - Updated URL patterns for finance module
 urlpatterns = [
     path("dashboard/", views.finance_dashboard, name="finance_dashboard"),
+    path("billing/", views.billing_list, name="billing_list"),  # (12-20-2025) Gocotano - Added billing list
     path("billing/<int:billing_id>/", views.billing_detail, name="billing_detail"),
     path("billing/<int:billing_id>/pay/", views.process_payment, name="process_payment"),
     path("billing/<int:billing_id>/philhealth/", views.apply_philhealth, name="apply_philhealth"),
